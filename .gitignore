@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+node_modules/
+build/
+dist/
+out/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.taiwan-brawl-index/
+viewer_flutter/build/
+viewer_flutter/.dart_tool/

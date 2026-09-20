@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "contracts": [
+    {
+      "id": "auth-session",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "POST /api/google-login",
+        "GET /api/me",
+        "GET /api/users/me",
+        "POST /api/logout"
+      ],
+      "invariants": [
+        "Web session may use cookie",
+        "non-Web clients may use Authorization: Bearer <session_id>",
+        "session TTL documented as 30 days"
+      ],
+      "validation": [
+        "backend auth tests",
+        "frontend login smoke test"
+      ]
+    },
+    {
+      "id": "direct-message-delivery",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front",
+        "user-basic-system"
+      ],
+      "surface": [
+        "POST /api/chat/dm/:friendId/send",
+        "GET /api/chat/dm/pending",
+        "POST /api/chat/dm/ack",
+        "GET /api/chat/dm/:friendId/history"
+      ],
+      "invariants": [
+        "pending_messages polling is current primary receive path",
+        "push is notification, not source of truth",
+        "CHAT_ROOM exists but client is not socket-first"
+      ],
+      "validation": [
+        "backend chat tests",
+        "frontend polling/ack behavior"
+      ]
+    },
+    {
+      "id": "push-notifications",
+      "owners": [
+        "taiwan-brawl-back",
+        "taiwan-brawl-front"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "GET /api/notifications/config",
+        "POST /api/notifications/register",
+        "POST /api/notifications/unregister",
+        "web/firebase-messaging-sw.js"
+      ],
+      "invariants": [
+        "Android/iOS/macOS/Web provider is FCM",
+        "invalid FCM tokens can be invalidated server-side"
+      ],
+      "validation": [
+        "backend push tests",
+        "frontend PushConfiguration tests",
+        "web service worker smoke check"
+      ]
+    },
+    {
+      "id": "royale-room",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "POST /api/rooms",
+        "POST /api/rooms/:code/join",
+        "POST /api/rooms/:code/ready",
+        "GET /api/rooms/:code/state",
+        "GET /api/rooms/:code/ws"
+      ],
+      "invariants": [
+        "ROYALE_ROOM Durable Object owns realtime match state",
+        "match history is persisted to D1 after completion"
+      ],
+      "validation": [
+        "backend room/combat tests",
+        "frontend lobby/arena smoke test"
+      ]
+    },
+    {
+      "id": "integrated-web-deploy",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "flutter build web",
+        "upload.js",
+        "STATIC_ASSETS KV",
+        "deploy.sh"
+      ],
+      "invariants": [
+        "same Worker serves API, media, and Flutter Web",
+        "build output is generated and must not be treated as source"
+      ],
+      "validation": [
+        "deploy script syntax",
+        "asset manifest generation",
+        "Worker smoke tests"
+      ]
+    },
+    {
+      "id": "ui-settings-package",
+      "owners": [
+        "user-ui-settings"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "ThemeProvider",
+        "LocaleProvider",
+        "UiSettingsProvider"
+      ],
+      "invariants": [
+        "path dependency must resolve in sibling-repo workspace layout"
+      ],
+      "validation": [
+        "flutter analyze",
+        "provider initialization smoke test"
+      ]
+    }
+  ]
+}

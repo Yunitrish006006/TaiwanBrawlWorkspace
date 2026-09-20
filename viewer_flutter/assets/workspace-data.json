@@ -1,0 +1,322 @@
+{
+  "generatedFrom": [
+    "data/repositories.json",
+    "data/relationships.json",
+    "data/contracts.json"
+  ],
+  "repositories": {
+    "schemaVersion": 1,
+    "snapshot": {
+      "date": "2026-09-20",
+      "scope": "source-state",
+      "publicationStateInferred": false,
+      "note": "Repository heads verified through the connected GitHub account; implementation timestamps are older than the workspace snapshot date."
+    },
+    "repositories": [
+      {
+        "id": "taiwan-brawl-front",
+        "name": "taiwan_brawl_front",
+        "kind": "frontend",
+        "active": true,
+        "repository": "https://github.com/Yunitrish006006/taiwan_brawl_front",
+        "defaultBranch": "main",
+        "commit": "a082ab2a409321424fa79aa24390d07cfe03cf43",
+        "headDate": "2026-05-30T08:37:26Z",
+        "version": "0.132.0",
+        "stack": [
+          "Flutter",
+          "Dart 3.11",
+          "Provider",
+          "Hive",
+          "WebSocket",
+          "Firebase Cloud Messaging"
+        ],
+        "role": "跨平台使用者介面、社交/聊天體驗、Royale 對戰 UI 與 FCM client。"
+      },
+      {
+        "id": "taiwan-brawl-back",
+        "name": "taiwan_brawl_back",
+        "kind": "backend",
+        "active": true,
+        "repository": "https://github.com/Yunitrish006006/taiwan_brawl_back",
+        "defaultBranch": "main",
+        "commit": "9465c95a7a520a1716f5279283e5c2f994154d6f",
+        "headDate": "2026-05-30T08:37:24Z",
+        "version": "0.1.0",
+        "stack": [
+          "Cloudflare Workers",
+          "D1",
+          "KV",
+          "Durable Objects",
+          "Wrangler",
+          "Node.js"
+        ],
+        "role": "API、session、社交/聊天、Royale 房間、媒體、FCM 發送與 Flutter Web 靜態站部署。"
+      },
+      {
+        "id": "user-ui-settings",
+        "name": "user_ui_settings",
+        "kind": "shared-flutter-package",
+        "active": true,
+        "repository": "https://github.com/Yunitrish006006/user_ui_settings",
+        "defaultBranch": "main",
+        "commit": "96e4f1d54f27a4c0fc1c923e1c8c2da9a384d117",
+        "headDate": "2026-05-30T08:06:09Z",
+        "version": "0.1.0",
+        "stack": [
+          "Flutter",
+          "Dart 3.11"
+        ],
+        "role": "共用 theme、locale 與 font-scale provider；目前前端以 sibling path dependency 引用。"
+      },
+      {
+        "id": "user-basic-system",
+        "name": "user_basic_system",
+        "kind": "shared-flutter-package",
+        "active": true,
+        "repository": "https://github.com/Yunitrish006006/user_basic_system",
+        "defaultBranch": "main",
+        "commit": "a15c1b595793ae46bcc952a9a45f2f83e3f223bd",
+        "headDate": "2026-04-20T11:44:30Z",
+        "version": "0.1.1",
+        "stack": [
+          "Flutter",
+          "Dart"
+        ],
+        "role": "可重用 profile 與 DM chat system abstraction；前端以 package dependency 引用。"
+      }
+    ]
+  },
+  "relationships": {
+    "schemaVersion": 1,
+    "relationships": [
+      {
+        "id": "front-back-api",
+        "from": "taiwan-brawl-front",
+        "to": "taiwan-brawl-back",
+        "classification": "runtime-hard",
+        "protocol": "HTTP /api/* + WebSocket",
+        "ownership": "backend owns API contracts; frontend owns client integration",
+        "notes": [
+          "Web uses session cookie",
+          "non-Web uses Bearer session_id"
+        ]
+      },
+      {
+        "id": "front-back-royale-ws",
+        "from": "taiwan-brawl-front",
+        "to": "taiwan-brawl-back",
+        "classification": "runtime-hard",
+        "protocol": "Royale room WebSocket",
+        "ownership": "ROYALE_ROOM state is backend-owned"
+      },
+      {
+        "id": "front-ui-settings",
+        "from": "taiwan-brawl-front",
+        "to": "user-ui-settings",
+        "classification": "build-hard",
+        "protocol": "Flutter path dependency ../user_ui_settings",
+        "ownership": "shared package owns UI settings provider behavior"
+      },
+      {
+        "id": "front-user-basic",
+        "from": "taiwan-brawl-front",
+        "to": "user-basic-system",
+        "classification": "build-hard",
+        "protocol": "Dart package ^0.1.1",
+        "ownership": "shared package owns reusable profile/DM abstractions"
+      },
+      {
+        "id": "deploy-build-front",
+        "from": "taiwan-brawl-back",
+        "to": "taiwan-brawl-front",
+        "classification": "build-orchestration",
+        "protocol": "deploy.sh builds Flutter Web then uploads assets to KV",
+        "ownership": "backend deploy tooling owns integrated site deployment"
+      },
+      {
+        "id": "back-cloudflare-d1",
+        "from": "taiwan-brawl-back",
+        "to": "external:cloudflare-d1",
+        "classification": "external-hard",
+        "protocol": "D1 binding DB"
+      },
+      {
+        "id": "back-cloudflare-kv",
+        "from": "taiwan-brawl-back",
+        "to": "external:cloudflare-kv",
+        "classification": "external-hard",
+        "protocol": "STATIC_ASSETS / CHAT_SYNC / PUSH_RETRY bindings"
+      },
+      {
+        "id": "back-cloudflare-do",
+        "from": "taiwan-brawl-back",
+        "to": "external:cloudflare-durable-objects",
+        "classification": "external-hard",
+        "protocol": "ROYALE_ROOM / CHAT_ROOM / SIGNAL_ROOM"
+      },
+      {
+        "id": "front-fcm",
+        "from": "taiwan-brawl-front",
+        "to": "external:firebase-fcm",
+        "classification": "external-runtime",
+        "protocol": "firebase_messaging"
+      },
+      {
+        "id": "back-fcm",
+        "from": "taiwan-brawl-back",
+        "to": "external:firebase-fcm",
+        "classification": "external-runtime",
+        "protocol": "FCM HTTP v1"
+      }
+    ]
+  },
+  "contracts": {
+    "schemaVersion": 1,
+    "contracts": [
+      {
+        "id": "auth-session",
+        "owners": [
+          "taiwan-brawl-back"
+        ],
+        "consumers": [
+          "taiwan-brawl-front"
+        ],
+        "surface": [
+          "POST /api/google-login",
+          "GET /api/me",
+          "GET /api/users/me",
+          "POST /api/logout"
+        ],
+        "invariants": [
+          "Web session may use cookie",
+          "non-Web clients may use Authorization: Bearer <session_id>",
+          "session TTL documented as 30 days"
+        ],
+        "validation": [
+          "backend auth tests",
+          "frontend login smoke test"
+        ]
+      },
+      {
+        "id": "direct-message-delivery",
+        "owners": [
+          "taiwan-brawl-back"
+        ],
+        "consumers": [
+          "taiwan-brawl-front",
+          "user-basic-system"
+        ],
+        "surface": [
+          "POST /api/chat/dm/:friendId/send",
+          "GET /api/chat/dm/pending",
+          "POST /api/chat/dm/ack",
+          "GET /api/chat/dm/:friendId/history"
+        ],
+        "invariants": [
+          "pending_messages polling is current primary receive path",
+          "push is notification, not source of truth",
+          "CHAT_ROOM exists but client is not socket-first"
+        ],
+        "validation": [
+          "backend chat tests",
+          "frontend polling/ack behavior"
+        ]
+      },
+      {
+        "id": "push-notifications",
+        "owners": [
+          "taiwan-brawl-back",
+          "taiwan-brawl-front"
+        ],
+        "consumers": [
+          "taiwan-brawl-front"
+        ],
+        "surface": [
+          "GET /api/notifications/config",
+          "POST /api/notifications/register",
+          "POST /api/notifications/unregister",
+          "web/firebase-messaging-sw.js"
+        ],
+        "invariants": [
+          "Android/iOS/macOS/Web provider is FCM",
+          "invalid FCM tokens can be invalidated server-side"
+        ],
+        "validation": [
+          "backend push tests",
+          "frontend PushConfiguration tests",
+          "web service worker smoke check"
+        ]
+      },
+      {
+        "id": "royale-room",
+        "owners": [
+          "taiwan-brawl-back"
+        ],
+        "consumers": [
+          "taiwan-brawl-front"
+        ],
+        "surface": [
+          "POST /api/rooms",
+          "POST /api/rooms/:code/join",
+          "POST /api/rooms/:code/ready",
+          "GET /api/rooms/:code/state",
+          "GET /api/rooms/:code/ws"
+        ],
+        "invariants": [
+          "ROYALE_ROOM Durable Object owns realtime match state",
+          "match history is persisted to D1 after completion"
+        ],
+        "validation": [
+          "backend room/combat tests",
+          "frontend lobby/arena smoke test"
+        ]
+      },
+      {
+        "id": "integrated-web-deploy",
+        "owners": [
+          "taiwan-brawl-back"
+        ],
+        "consumers": [
+          "taiwan-brawl-front"
+        ],
+        "surface": [
+          "flutter build web",
+          "upload.js",
+          "STATIC_ASSETS KV",
+          "deploy.sh"
+        ],
+        "invariants": [
+          "same Worker serves API, media, and Flutter Web",
+          "build output is generated and must not be treated as source"
+        ],
+        "validation": [
+          "deploy script syntax",
+          "asset manifest generation",
+          "Worker smoke tests"
+        ]
+      },
+      {
+        "id": "ui-settings-package",
+        "owners": [
+          "user-ui-settings"
+        ],
+        "consumers": [
+          "taiwan-brawl-front"
+        ],
+        "surface": [
+          "ThemeProvider",
+          "LocaleProvider",
+          "UiSettingsProvider"
+        ],
+        "invariants": [
+          "path dependency must resolve in sibling-repo workspace layout"
+        ],
+        "validation": [
+          "flutter analyze",
+          "provider initialization smoke test"
+        ]
+      }
+    ]
+  }
+}

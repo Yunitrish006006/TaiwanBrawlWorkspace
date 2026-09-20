@@ -1,0 +1,8 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {"label":"Taiwan Brawl: Validate Workspace","type":"shell","command":"node scripts/validate-workspace.mjs","problemMatcher":[]},
+    {"label":"Taiwan Brawl: Render Viewer Data","type":"shell","command":"node scripts/render-flutter-data.mjs","problemMatcher":[]},
+    {"label":"Taiwan Brawl: Summary","type":"shell","command":"node scripts/taiwan-brawl-intelligence.mjs summary","problemMatcher":[]}
+  ]
+}

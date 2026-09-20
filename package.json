@@ -1,0 +1,11 @@
+{
+  "name": "taiwan-brawl-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "validate": "node scripts/validate-workspace.mjs",
+    "summary": "node scripts/taiwan-brawl-intelligence.mjs summary",
+    "render": "node scripts/render-flutter-data.mjs"
+  }
+}

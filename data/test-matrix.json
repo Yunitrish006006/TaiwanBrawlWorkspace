@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    {
+      "id": "workspace",
+      "requiredFor": [
+        "data-change",
+        "contract-change"
+      ],
+      "commands": [
+        "node scripts/validate-workspace.mjs"
+      ]
+    },
+    {
+      "id": "frontend",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "frontend-change",
+        "shared-flutter-package-change",
+        "contract-change"
+      ],
+      "commands": [
+        "flutter analyze",
+        "flutter test"
+      ]
+    },
+    {
+      "id": "backend",
+      "repository": "taiwan-brawl-back",
+      "requiredFor": [
+        "backend-change",
+        "api-change",
+        "contract-change"
+      ],
+      "commands": [
+        "npm test"
+      ]
+    },
+    {
+      "id": "deploy",
+      "repository": "taiwan-brawl-back",
+      "requiredFor": [
+        "deployment-change"
+      ],
+      "commands": [
+        "bash -n deploy.sh"
+      ]
+    },
+    {
+      "id": "shared-ui-settings",
+      "repository": "user-ui-settings",
+      "requiredFor": [
+        "shared-flutter-package-change"
+      ],
+      "commands": [
+        "flutter analyze",
+        "flutter test"
+      ]
+    },
+    {
+      "id": "shared-user-basic",
+      "repository": "user-basic-system",
+      "requiredFor": [
+        "shared-flutter-package-change"
+      ],
+      "commands": [
+        "flutter analyze",
+        "flutter test"
+      ]
+    }
+  ],
+  "notes": [
+    "Commands are requirements/categories, not evidence that validation passed.",
+    "Do not invent remote CI or publication state."
+  ]
+}

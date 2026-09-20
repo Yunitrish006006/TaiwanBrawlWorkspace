@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "snapshot": {
+    "date": "2026-09-20",
+    "scope": "source-state",
+    "publicationStateInferred": false,
+    "note": "Repository heads verified through the connected GitHub account; implementation timestamps are older than the workspace snapshot date."
+  },
+  "repositories": [
+    {
+      "id": "taiwan-brawl-front",
+      "name": "taiwan_brawl_front",
+      "kind": "frontend",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/taiwan_brawl_front",
+      "defaultBranch": "main",
+      "commit": "a082ab2a409321424fa79aa24390d07cfe03cf43",
+      "headDate": "2026-05-30T08:37:26Z",
+      "version": "0.132.0",
+      "stack": [
+        "Flutter",
+        "Dart 3.11",
+        "Provider",
+        "Hive",
+        "WebSocket",
+        "Firebase Cloud Messaging"
+      ],
+      "role": "跨平台使用者介面、社交/聊天體驗、Royale 對戰 UI 與 FCM client。"
+    },
+    {
+      "id": "taiwan-brawl-back",
+      "name": "taiwan_brawl_back",
+      "kind": "backend",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/taiwan_brawl_back",
+      "defaultBranch": "main",
+      "commit": "9465c95a7a520a1716f5279283e5c2f994154d6f",
+      "headDate": "2026-05-30T08:37:24Z",
+      "version": "0.1.0",
+      "stack": [
+        "Cloudflare Workers",
+        "D1",
+        "KV",
+        "Durable Objects",
+        "Wrangler",
+        "Node.js"
+      ],
+      "role": "API、session、社交/聊天、Royale 房間、媒體、FCM 發送與 Flutter Web 靜態站部署。"
+    },
+    {
+      "id": "user-ui-settings",
+      "name": "user_ui_settings",
+      "kind": "shared-flutter-package",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/user_ui_settings",
+      "defaultBranch": "main",
+      "commit": "96e4f1d54f27a4c0fc1c923e1c8c2da9a384d117",
+      "headDate": "2026-05-30T08:06:09Z",
+      "version": "0.1.0",
+      "stack": [
+        "Flutter",
+        "Dart 3.11"
+      ],
+      "role": "共用 theme、locale 與 font-scale provider；目前前端以 sibling path dependency 引用。"
+    },
+    {
+      "id": "user-basic-system",
+      "name": "user_basic_system",
+      "kind": "shared-flutter-package",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/user_basic_system",
+      "defaultBranch": "main",
+      "commit": "a15c1b595793ae46bcc952a9a45f2f83e3f223bd",
+      "headDate": "2026-04-20T11:44:30Z",
+      "version": "0.1.1",
+      "stack": [
+        "Flutter",
+        "Dart"
+      ],
+      "role": "可重用 profile 與 DM chat system abstraction；前端以 package dependency 引用。"
+    }
+  ]
+}

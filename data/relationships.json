@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "relationships": [
+    {
+      "id": "front-back-api",
+      "from": "taiwan-brawl-front",
+      "to": "taiwan-brawl-back",
+      "classification": "runtime-hard",
+      "protocol": "HTTP /api/* + WebSocket",
+      "ownership": "backend owns API contracts; frontend owns client integration",
+      "notes": [
+        "Web uses session cookie",
+        "non-Web uses Bearer session_id"
+      ]
+    },
+    {
+      "id": "front-back-royale-ws",
+      "from": "taiwan-brawl-front",
+      "to": "taiwan-brawl-back",
+      "classification": "runtime-hard",
+      "protocol": "Royale room WebSocket",
+      "ownership": "ROYALE_ROOM state is backend-owned"
+    },
+    {
+      "id": "front-ui-settings",
+      "from": "taiwan-brawl-front",
+      "to": "user-ui-settings",
+      "classification": "build-hard",
+      "protocol": "Flutter path dependency ../user_ui_settings",
+      "ownership": "shared package owns UI settings provider behavior"
+    },
+    {
+      "id": "front-user-basic",
+      "from": "taiwan-brawl-front",
+      "to": "user-basic-system",
+      "classification": "build-hard",
+      "protocol": "Dart package ^0.1.1",
+      "ownership": "shared package owns reusable profile/DM abstractions"
+    },
+    {
+      "id": "deploy-build-front",
+      "from": "taiwan-brawl-back",
+      "to": "taiwan-brawl-front",
+      "classification": "build-orchestration",
+      "protocol": "deploy.sh builds Flutter Web then uploads assets to KV",
+      "ownership": "backend deploy tooling owns integrated site deployment"
+    },
+    {
+      "id": "back-cloudflare-d1",
+      "from": "taiwan-brawl-back",
+      "to": "external:cloudflare-d1",
+      "classification": "external-hard",
+      "protocol": "D1 binding DB"
+    },
+    {
+      "id": "back-cloudflare-kv",
+      "from": "taiwan-brawl-back",
+      "to": "external:cloudflare-kv",
+      "classification": "external-hard",
+      "protocol": "STATIC_ASSETS / CHAT_SYNC / PUSH_RETRY bindings"
+    },
+    {
+      "id": "back-cloudflare-do",
+      "from": "taiwan-brawl-back",
+      "to": "external:cloudflare-durable-objects",
+      "classification": "external-hard",
+      "protocol": "ROYALE_ROOM / CHAT_ROOM / SIGNAL_ROOM"
+    },
+    {
+      "id": "front-fcm",
+      "from": "taiwan-brawl-front",
+      "to": "external:firebase-fcm",
+      "classification": "external-runtime",
+      "protocol": "firebase_messaging"
+    },
+    {
+      "id": "back-fcm",
+      "from": "taiwan-brawl-back",
+      "to": "external:firebase-fcm",
+      "classification": "external-runtime",
+      "protocol": "FCM HTTP v1"
+    }
+  ]
+}

@@ -32,8 +32,19 @@ for (const contract of contracts.contracts) {
 }
 check(Array.isArray(testMatrix.categories) && testMatrix.categories.length >= 4, "test matrix is too small");
 
-const required = ["README.md", "AGENTS.md", "data/repositories.json", "data/relationships.json", "data/contracts.json", "data/test-matrix.json", "viewer_flutter/pubspec.yaml"];
+const required = [
+  "README.md",
+  "AGENTS.md",
+  "data/repositories.json",
+  "data/relationships.json",
+  "data/contracts.json",
+  "data/test-matrix.json",
+  "apps/viewer_flutter/pubspec.yaml"
+];
 for (const file of required) check(fs.existsSync(path.join(root, file)), `missing ${file}`);
+
+const gitignore = fs.readFileSync(path.join(root, ".gitignore"), "utf8");
+check(gitignore.includes("apps/viewer_flutter/assets/workspace-data.json"), "generated Flutter workspace data must be ignored");
 
 const forbiddenDirs = new Set(["node_modules", "build", "dist", "out", ".dart_tool"]);
 const secretPatterns = [
@@ -50,12 +61,10 @@ function walk(dir, rel = "") {
     if (nextRel.split(path.sep).some((part) => forbiddenDirs.has(part))) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, nextRel);
-    else {
-      if (/\.(md|json|mjs|js|yml|yaml|html|txt|gitignore)$/.test(entry.name) || entry.name === ".gitignore") {
-        const text = fs.readFileSync(full, "utf8");
-        check(!/\/(?:home|Users)\/[A-Za-z0-9._-]+\//.test(text), `${nextRel} contains host-specific absolute path`);
-        for (const pattern of secretPatterns) check(!pattern.test(text), `${nextRel} may contain a secret`);
-      }
+    else if (/\.(md|json|mjs|js|yml|yaml|html|txt|gitignore)$/.test(entry.name) || entry.name === ".gitignore") {
+      const text = fs.readFileSync(full, "utf8");
+      check(!/\/(?:home|Users)\/[A-Za-z0-9._-]+\//.test(text), `${nextRel} contains host-specific absolute path`);
+      for (const pattern of secretPatterns) check(!pattern.test(text), `${nextRel} may contain a secret`);
     }
   }
 }

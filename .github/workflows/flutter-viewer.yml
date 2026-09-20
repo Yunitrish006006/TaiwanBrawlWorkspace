@@ -2,9 +2,17 @@ name: Validate Flutter Viewer
 
 on:
   push:
-    paths: ["viewer_flutter/**", "data/**", "scripts/render-flutter-data.mjs", ".github/workflows/flutter-viewer.yml"]
+    paths:
+      - "apps/viewer_flutter/**"
+      - "data/**"
+      - "scripts/render-flutter-data.mjs"
+      - ".github/workflows/flutter-viewer.yml"
   pull_request:
-    paths: ["viewer_flutter/**", "data/**", "scripts/render-flutter-data.mjs", ".github/workflows/flutter-viewer.yml"]
+    paths:
+      - "apps/viewer_flutter/**"
+      - "data/**"
+      - "scripts/render-flutter-data.mjs"
+      - ".github/workflows/flutter-viewer.yml"
   workflow_dispatch:
 
 permissions:
@@ -18,12 +26,13 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: node scripts/render-flutter-data.mjs
-      - working-directory: viewer_flutter
+      - name: Generate viewer data from canonical workspace data
+        run: node scripts/render-flutter-data.mjs
+      - working-directory: apps/viewer_flutter
         run: flutter pub get
-      - working-directory: viewer_flutter
+      - working-directory: apps/viewer_flutter
         run: flutter analyze
-      - working-directory: viewer_flutter
+      - working-directory: apps/viewer_flutter
         run: flutter test
-      - working-directory: viewer_flutter
+      - working-directory: apps/viewer_flutter
         run: flutter build web --release

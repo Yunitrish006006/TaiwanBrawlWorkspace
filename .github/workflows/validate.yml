@@ -20,6 +20,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-      - run: node scripts/validate-workspace.mjs
-      - run: node scripts/render-flutter-data.mjs
-      - run: git diff --exit-code -- viewer_flutter/assets/workspace-data.json
+      - name: Validate canonical workspace data and structure
+        run: node scripts/validate-workspace.mjs
+      - name: Generate transient Flutter input
+        run: node scripts/render-flutter-data.mjs
+      - name: Validate generated JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('apps/viewer_flutter/assets/workspace-data.json','utf8'))"
+      - name: Ensure generated viewer input stays untracked
+        run: git check-ignore apps/viewer_flutter/assets/workspace-data.json

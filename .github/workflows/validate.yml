@@ -24,6 +24,8 @@ jobs:
         run: node scripts/validate-workspace.mjs
       - name: Generate transient Flutter input
         run: node scripts/render-flutter-data.mjs
+      - name: Test model routing and execution budgets without model calls
+        run: npm test
       - name: Validate generated JSON
         run: node -e "JSON.parse(require('fs').readFileSync('apps/viewer_flutter/assets/workspace-data.json','utf8'))"
       - name: Ensure generated viewer input stays untracked

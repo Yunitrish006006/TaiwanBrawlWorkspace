@@ -11,6 +11,8 @@ out/
 .flutter-plugins-dependencies
 .packages
 .taiwan-brawl-index/
+.codex/
 apps/viewer_flutter/build/
 apps/viewer_flutter/.dart_tool/
 apps/viewer_flutter/assets/workspace-data.json
+apps/viewer_flutter/web/data/workspace-data.json

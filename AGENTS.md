@@ -41,12 +41,24 @@ resolve task
 
 Do not report tests, CI, deploy, publication, or remote state as complete without actual evidence.
 
+## Model tiering and quota use
+
+- Before substantive work, use `node scripts/taiwan-brawl-intelligence.mjs model-plan "<bounded task>"` or `orchestrate` to read the local routing decision. See `docs/model-tiering.md`; `data/model-policy.json` is the sole policy source.
+- Use direct deterministic tools for known summary/validation/generation tasks. Keep exploration limited to owning repositories and affected contracts.
+- When the client supports model selection, apply the planned model and effort before starting work. Plans do not change the current session's model; never claim they do.
+- Do not start a nested Codex session or delegate the same task merely to change models. `scripts/run-task.mjs` is a user-invoked entrypoint for a new task; it defaults to a preview and executes with `--execute`.
+- `npm run task:auto -- "<task>"` is the user-invoked execute shortcut. `npm run model-defaults -- --write . ..` installs economy defaults derived from the policy for new sessions in the selected directories; explicit client/CLI selections can override them. Neither command changes an active conversation's model.
+- A tier override needs a concrete reason. Escalate one level only with the documented failure evidence; network/authentication/quota/environment failures need diagnosis, not a larger model.
+- Reuse passed validation until relevant inputs change. Do not repeat full scans or successful test suites without new evidence, and do not skip required owner/consumer validation to save quota.
+- Keep handoffs to changed files, concise failure evidence and actual validation. Never replay the entire conversation as a new prompt.
+
 ## Required workspace validation
 
 At minimum, after changing workspace data or docs:
 
 ```bash
 node scripts/validate-workspace.mjs
+npm test
 node scripts/render-flutter-data.mjs
 ```
 

@@ -91,8 +91,25 @@ node scripts/taiwan-brawl-intelligence.mjs summary
 node scripts/taiwan-brawl-intelligence.mjs resolve "聊天推播沒收到"
 node scripts/taiwan-brawl-intelligence.mjs impact taiwan-brawl-back
 node scripts/taiwan-brawl-intelligence.mjs test-plan "修改 Royale 房間 websocket"
+node scripts/taiwan-brawl-intelligence.mjs model-plan "更新 README 文件"
+node scripts/taiwan-brawl-intelligence.mjs orchestrate "修改 Royale 房間 websocket"
 node scripts/validate-workspace.mjs
 ```
+
+## Model tiering
+
+開發任務先由本機規則分類：明確工具任務不使用模型，文件與機械式工作使用 Luna，日常開發使用 Terra，敏感或複雜修改使用 Sol；Astra 需明確理由或失敗證據才能升級。Canonical policy 是 `data/model-policy.json`。
+
+```bash
+# 安裝本專案與外層工作區的 Luna / low 預設（不改全域設定）
+npm run model-defaults -- --write . ..
+# 預覽，不使用模型額度
+npm run task -- "修正 Royale 按鈕顏色" --cwd ../taiwan_brawl_front
+# 依分級實際啟動一次 Codex
+npm run task:auto -- "修正 Royale 按鈕顏色" --cwd ../taiwan_brawl_front
+```
+
+`model-defaults` 為新工作階段提供低成本預設；`task:auto` 在每個新任務啟動時依內容選模型。runner 有單次程序、並行鎖、逾時與本機用量紀錄，不會自動重試或派出 subagent。既有聊天或客戶端明確選定的模型不會被文件或計畫自動切換。完整規則、升級與限制見 [Model tiering](docs/model-tiering.md)。
 
 ## Flutter Viewer
 

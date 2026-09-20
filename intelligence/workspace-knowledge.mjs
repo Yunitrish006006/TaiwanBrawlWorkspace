@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { hasTerm, taskSignals } from "./model-policy.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = (name) => JSON.parse(fs.readFileSync(path.join(root, "data", name), "utf8"));
@@ -26,12 +27,12 @@ const vocabulary = {
 export function resolveTask(text) {
   const q = String(text || "").toLowerCase();
   const focus = Object.entries(vocabulary)
-    .filter(([, words]) => words.some((word) => q.includes(word)))
+    .filter(([, words]) => words.some((word) => hasTerm(q, word)))
     .map(([name]) => name);
   const workspace = loadWorkspace();
   const contractMatches = workspace.contracts.contracts.filter((contract) => {
     const blob = JSON.stringify(contract).toLowerCase();
-    return focus.some((term) => blob.includes(term)) || q.split(/\s+/).filter(Boolean).some((term) => term.length > 2 && blob.includes(term));
+    return focus.some((term) => hasTerm(blob, term)) || q.split(/\s+/).filter(Boolean).some((term) => term.length > 2 && hasTerm(blob, term));
   });
   const repoIds = new Set(contractMatches.flatMap((c) => [...c.owners, ...c.consumers]));
   if (focus.includes("ui")) repoIds.add("user-ui-settings");
@@ -49,11 +50,17 @@ export function impactForRepository(repoId) {
 export function testPlanForTask(text) {
   const resolved = resolveTask(text);
   const workspace = loadWorkspace();
-  const tags = new Set(["contract-change"]);
-  if (resolved.repositories.includes("taiwan-brawl-front")) tags.add("frontend-change");
-  if (resolved.repositories.includes("taiwan-brawl-back")) tags.add("backend-change");
-  if (resolved.repositories.some((id) => id.startsWith("user-"))) tags.add("shared-flutter-package-change");
-  if (resolved.focus.includes("deploy")) tags.add("deployment-change");
-  const categories = workspace.testMatrix.categories.filter((entry) => entry.requiredFor.some((tag) => tags.has(tag)));
-  return { resolved, tags: [...tags], categories };
+  const signals = taskSignals(text);
+  const tags = new Set(["data-change"]);
+  if (signals.changesBehavior) {
+    if (signals.contract) tags.add("contract-change");
+    if (resolved.repositories.includes("taiwan-brawl-front")) tags.add("frontend-change");
+    if (resolved.repositories.includes("taiwan-brawl-back")) tags.add("backend-change");
+    if (resolved.repositories.some((id) => id.startsWith("user-"))) tags.add("shared-flutter-package-change");
+    if (resolved.focus.includes("deploy")) tags.add("deployment-change");
+  }
+  const categories = workspace.testMatrix.categories.filter((entry) =>
+    entry.requiredFor.some((tag) => tags.has(tag)) &&
+    (!entry.repository || resolved.repositories.includes(entry.repository)));
+  return { resolved, tags: [...tags], categories, scopeNeedsInspection: signals.changesBehavior && resolved.repositories.length === 0 };
 }

@@ -19,5 +19,9 @@ const output = {
 
 const target = path.join(root, "apps", "viewer_flutter", "assets", "workspace-data.json");
 fs.mkdirSync(path.dirname(target), { recursive: true });
-fs.writeFileSync(target, JSON.stringify(output, null, 2) + "\n");
-console.log(`generated transient viewer asset: ${path.relative(root, target)}`);
+const serialized = JSON.stringify(output, null, 2) + "\n";
+fs.writeFileSync(target, serialized);
+const webTarget = path.join(root, "apps", "viewer_flutter", "web", "data", "workspace-data.json");
+fs.mkdirSync(path.dirname(webTarget), { recursive: true });
+fs.writeFileSync(webTarget, serialized);
+console.log(`generated viewer data: ${path.relative(root, target)} and ${path.relative(root, webTarget)}`);

@@ -8,7 +8,9 @@
         "contract-change"
       ],
       "commands": [
-        "node scripts/validate-workspace.mjs"
+        "node scripts/validate-workspace.mjs",
+        "npm test",
+        "node scripts/render-flutter-data.mjs"
       ]
     },
     {

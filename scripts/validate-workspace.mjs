@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { validateModelPolicy } from "../intelligence/model-policy.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
@@ -13,6 +14,8 @@ const repos = readJson("repositories.json");
 const relationships = readJson("relationships.json");
 const contracts = readJson("contracts.json");
 const testMatrix = readJson("test-matrix.json");
+const modelPolicyErrors = validateModelPolicy(readJson("model-policy.json"));
+check(modelPolicyErrors.length === 0, `model policy: ${modelPolicyErrors.join("; ")}`);
 
 check(repos.schemaVersion === 1, "repositories schemaVersion must be 1");
 check(Array.isArray(repos.repositories) && repos.repositories.length >= 4, "expected at least four repositories");
@@ -39,12 +42,14 @@ const required = [
   "data/relationships.json",
   "data/contracts.json",
   "data/test-matrix.json",
+  "data/model-policy.json",
   "apps/viewer_flutter/pubspec.yaml"
 ];
 for (const file of required) check(fs.existsSync(path.join(root, file)), `missing ${file}`);
 
 const gitignore = fs.readFileSync(path.join(root, ".gitignore"), "utf8");
 check(gitignore.includes("apps/viewer_flutter/assets/workspace-data.json"), "generated Flutter workspace data must be ignored");
+check(gitignore.includes("apps/viewer_flutter/web/data/workspace-data.json"), "runtime Flutter web workspace data must be ignored");
 
 const forbiddenDirs = new Set(["node_modules", "build", "dist", "out", ".dart_tool"]);
 const secretPatterns = [

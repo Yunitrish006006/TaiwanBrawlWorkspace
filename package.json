@@ -6,6 +6,11 @@
   "scripts": {
     "validate": "node scripts/validate-workspace.mjs",
     "summary": "node scripts/taiwan-brawl-intelligence.mjs summary",
+    "test": "node --test tests/*.test.mjs",
+    "model-plan": "node scripts/taiwan-brawl-intelligence.mjs model-plan",
+    "task": "node scripts/run-task.mjs",
+    "task:auto": "node scripts/run-task.mjs --execute",
+    "model-defaults": "node scripts/setup-model-defaults.mjs",
     "render": "node scripts/render-flutter-data.mjs"
   }
 }

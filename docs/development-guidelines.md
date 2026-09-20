@@ -7,3 +7,5 @@
 5. Update snapshot SHAs only after re-reading the owning repository head.
 6. Prefer small contract-preserving changes before large architecture migrations.
 7. A polling-to-WebSocket DM migration must update frontend ChatService, backend chat contract, tests, docs, and this workspace together.
+8. Use the local [model tiering policy](model-tiering.md) before allocating a model. Plans are advisory for existing sessions; the task runner applies the selected model to a new process.
+9. Keep validation scoped to changed behavior and actual consumers. Reuse completed checks until relevant inputs change; preserve evidence when handing off a failed task.

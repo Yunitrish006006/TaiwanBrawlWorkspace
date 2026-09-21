@@ -264,6 +264,23 @@ List<_FeatureSpec> _featuresFor(RepositoryData repo) {
                 '前端可重連並重新取得房間快照；斷線時顯示連線狀態，恢復後以 server snapshot 校正本地畫面。')
           ]),
       _FeatureSpec(
+          '遊戲玩法',
+          '與 Flutter UX、Social & Chat、Royale UI 同一層的產品玩法節點。它描述玩家從進入 lobby、組牌、加入房間、進行回合到完成結算的完整循環；畫面只是呈現玩法狀態，規則與結果由 server contract 驗證。',
+          [
+            _FeatureSpec('進入與配對',
+                '玩家先完成登入，再從 lobby 選擇玩法或加入房間；前端傳送玩家與玩法參數，後端確認資格、房間容量與目前階段。'),
+            _FeatureSpec(
+                '牌組與出戰準備', '玩家在開戰前選擇合法牌組與角色設定；前端做即時提示，送出時仍由後端驗證牌組版本、資源與規則。'),
+            _FeatureSpec('回合與玩家操作',
+                '每回合由 server state 決定可用操作、順序與結果；client 傳送 command，收到結果後更新動畫、血量、資源與回合倒數。'),
+            _FeatureSpec(
+                '勝負與結算', '達成勝利、淘汰或時間結束條件後，由房間狀態產生唯一結算；前端顯示結果與獎勵，不能自行計算或重複發放。'),
+            _FeatureSpec('斷線與重新加入',
+                '斷線時保留房間 ID 與連線狀態，重新連線後先取得 snapshot，再恢復到正確回合；不要用本地暫存狀態覆蓋 server truth。'),
+            _FeatureSpec('玩法與資料分離',
+                '玩法規則、房間狀態與玩家資料由後端與共用模型提供，Flutter Widget 只負責呈現；規則更新時可更新資料與 contract，不必重做整個 viewer。')
+          ]),
+      _FeatureSpec(
           'FCM Client 管理元件', '註冊裝置 token、處理前景與背景通知，通知只作為提醒通道，不取代後端持久化資料。', [
         _FeatureSpec('Token 註冊',
             '登入且取得通知權限後取得 FCM token，送到後端並與使用者或裝置關聯；token 更新時要重新同步。'),

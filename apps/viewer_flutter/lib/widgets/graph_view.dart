@@ -70,6 +70,7 @@ class _GraphViewState extends State<GraphView> {
                     padding: const EdgeInsets.all(12),
                     child: _Details(
                         data: widget.data,
+                        scene: widget.scene,
                         node: widget.scene.nodes
                             .firstWhere((node) => node.id == selected)),
                   ),
@@ -143,8 +144,9 @@ class _Hint extends StatelessWidget {
 }
 
 class _Details extends StatelessWidget {
-  const _Details({required this.data, required this.node});
+  const _Details({required this.data, required this.scene, required this.node});
   final WorkspaceData data;
+  final GraphScene scene;
   final GraphNode node;
   @override
   Widget build(BuildContext context) {
@@ -157,6 +159,10 @@ class _Details extends StatelessWidget {
             contract.owners.contains(node.repository.id) ||
             contract.consumers.contains(node.repository.id))
         .toList();
+    final children = scene.nodes.where((item) => item.parentId == node.id);
+    final parent = node.parentId == null
+        ? null
+        : scene.nodes.where((item) => item.id == node.parentId).firstOrNull;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxHeight: 420),
       child: SingleChildScrollView(
@@ -167,16 +173,30 @@ class _Details extends StatelessWidget {
           const SizedBox(height: 5),
           Text('${node.repository.kind}  •  v${node.repository.version}',
               style: const TextStyle(color: Color(0xff9ec5e8), fontSize: 12)),
+          if (parent != null) ...[
+            const SizedBox(height: 4),
+            Text('上層：${parent.label}',
+                style: const TextStyle(color: Color(0xff9ec5e8), fontSize: 11)),
+          ],
           const SizedBox(height: 8),
           Text(node.details,
               style: const TextStyle(color: Colors.white, fontSize: 12)),
           const SizedBox(height: 8),
           Text(
-              '${node.isChild ? '子系統' : '系統'}  •  連線 ${node.degree}  •  負責契約 ${node.contractCount}',
+              '${node.depth == 0 ? '系統根節點' : node.depth == 1 ? '管理元件' : '說明節點'}  •  連線 ${node.degree}  •  負責契約 ${node.contractCount}',
               style: const TextStyle(color: Color(0xffc5d8eb), fontSize: 12)),
           const SizedBox(height: 5),
           Text(node.repository.repository,
               style: const TextStyle(color: Color(0xff7dd3fc), fontSize: 10)),
+          if (children.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            const _SectionTitle('下一層說明'),
+            ...children.map((child) => Padding(
+                padding: const EdgeInsets.only(bottom: 3),
+                child: Text('• ${child.label}',
+                    style: const TextStyle(
+                        color: Color(0xffd7e5f3), fontSize: 11)))),
+          ],
           ...[
             const SizedBox(height: 10),
             const _SectionTitle('關聯資料'),
@@ -291,16 +311,20 @@ class _GraphPainter extends CustomPainter {
     for (final node in scene.nodes) {
       final p = positions[node.id]!;
       final active = node.id == selected;
-      final color = node.isChild
-          ? const Color(0xff34d399)
-          : node.repository.kind == 'frontend'
-              ? const Color(0xff22d3ee)
-              : node.repository.kind == 'backend'
-                  ? const Color(0xff60a5fa)
-                  : const Color(0xffa78bfa);
-      final double radius = node.isChild
-          ? 6
-          : 8.0 + math.min(8.0, node.degree.toDouble()).toDouble();
+      final color = node.depth >= 2
+          ? const Color(0xfffbbf24)
+          : node.isChild
+              ? const Color(0xff34d399)
+              : node.repository.kind == 'frontend'
+                  ? const Color(0xff22d3ee)
+                  : node.repository.kind == 'backend'
+                      ? const Color(0xff60a5fa)
+                      : const Color(0xffa78bfa);
+      final double radius = node.depth >= 2
+          ? 5
+          : node.isChild
+              ? 6
+              : 8.0 + math.min(8.0, node.degree.toDouble()).toDouble();
       canvas.drawCircle(
         p,
         active ? radius + 10 : radius + 5,

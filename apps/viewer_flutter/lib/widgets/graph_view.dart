@@ -14,7 +14,10 @@ class GraphView extends StatefulWidget {
 
 class _GraphViewState extends State<GraphView> {
   double yaw = -.48, pitch = .22, zoom = 1;
+  Offset pan = Offset.zero;
   String? selected;
+  bool secondaryPointer = false;
+  final expanded = <String>{};
   final enabledEdges = <String>{
     'runtime-hard',
     'build-hard',
@@ -30,12 +33,38 @@ class _GraphViewState extends State<GraphView> {
           children: [
             GestureDetector(
               onPanUpdate: (d) => setState(() {
+                if (secondaryPointer) return;
                 yaw += d.delta.dx * .008;
                 pitch = (pitch + d.delta.dy * .006).clamp(-1.2, 1.2);
               }),
-              onTapUp: (d) => setState(() =>
-                  selected = _hit(d.localPosition, context.size ?? Size.zero)),
+              onTapUp: (d) => setState(() {
+                final hit = _hit(d.localPosition, context.size ?? Size.zero);
+                if (hit == null) {
+                  selected = null;
+                  return;
+                }
+                selected = hit;
+                if (_childrenOf(hit).isNotEmpty) {
+                  if (expanded.contains(hit)) {
+                    _collapse(hit);
+                  } else {
+                    expanded.add(hit);
+                  }
+                }
+              }),
               child: Listener(
+                onPointerDown: (event) {
+                  if (event.buttons & kSecondaryMouseButton != 0) {
+                    secondaryPointer = true;
+                  }
+                },
+                onPointerUp: (_) => secondaryPointer = false,
+                onPointerCancel: (_) => secondaryPointer = false,
+                onPointerMove: (event) {
+                  if (secondaryPointer) {
+                    setState(() => pan += event.delta);
+                  }
+                },
                 onPointerSignal: (event) {
                   if (event is PointerScrollEvent) {
                     setState(
@@ -51,8 +80,10 @@ class _GraphViewState extends State<GraphView> {
                     yaw: yaw,
                     pitch: pitch,
                     zoom: zoom,
+                    pan: pan,
                     selected: selected,
                     enabledEdges: enabledEdges,
+                    visibleIds: _visibleIds,
                   ),
                   child: const SizedBox.expand(),
                 ),
@@ -96,24 +127,60 @@ class _GraphViewState extends State<GraphView> {
                           yaw = -.48;
                           pitch = .22;
                           zoom = 1;
+                          pan = Offset.zero;
                           selected = null;
+                          expanded.clear();
                         }),
                     icon: const Icon(Icons.refresh, size: 16),
                     label: const Text('重設視角'))),
           ],
         ),
       );
+  Set<String> get _visibleIds {
+    final visible = <String>{};
+    for (final node in widget.scene.nodes) {
+      var parent = node.parentId;
+      var isVisible = true;
+      while (parent != null) {
+        if (!expanded.contains(parent)) {
+          isVisible = false;
+          break;
+        }
+        parent = widget.scene.nodes
+            .where((candidate) => candidate.id == parent)
+            .firstOrNull
+            ?.parentId;
+      }
+      if (isVisible) visible.add(node.id);
+    }
+    return visible;
+  }
+
+  List<GraphNode> _childrenOf(String id) =>
+      widget.scene.nodes.where((node) => node.parentId == id).toList();
+
+  void _collapse(String id) {
+    expanded.remove(id);
+    for (final child in _childrenOf(id)) {
+      _collapse(child.id);
+    }
+  }
+
   String? _hit(Offset point, Size size) {
     String? hit;
     var distance = 30.0;
     for (final node in widget.scene.nodes) {
+      if (!_visibleIds.contains(node.id)) {
+        continue;
+      }
       final next = (projectPoint(
                 node.position,
                 size,
                 yaw: yaw,
                 pitch: pitch,
                 zoom: zoom,
-              ) -
+              ) +
+              pan -
               point)
           .distance;
       if (next < distance) {
@@ -136,7 +203,7 @@ class _Hint extends StatelessWidget {
         child: const Padding(
           padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
           child: Text(
-            '3D VIEW  •  拖曳旋轉  •  滾輪縮放  •  點節點查看系統',
+            '3D VIEW  •  左鍵拖曳旋轉  •  右鍵拖曳平移  •  滾輪縮放  •  點擊展開',
             style: TextStyle(color: Colors.white, fontSize: 12),
           ),
         ),
@@ -266,13 +333,17 @@ class _GraphPainter extends CustomPainter {
     required this.yaw,
     required this.pitch,
     required this.zoom,
+    required this.pan,
     required this.selected,
     required this.enabledEdges,
+    required this.visibleIds,
   });
   final GraphScene scene;
   final double yaw, pitch, zoom;
+  final Offset pan;
   final String? selected;
   final Set<String> enabledEdges;
+  final Set<String> visibleIds;
   @override
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(
@@ -282,14 +353,19 @@ class _GraphPainter extends CustomPainter {
     final positions = {
       for (final node in scene.nodes)
         node.id: projectPoint(
-          node.position,
-          size,
-          yaw: yaw,
-          pitch: pitch,
-          zoom: zoom,
-        ),
+              node.position,
+              size,
+              yaw: yaw,
+              pitch: pitch,
+              zoom: zoom,
+            ) +
+            pan,
     };
     for (final relation in scene.edges) {
+      if (!visibleIds.contains(relation.from) ||
+          !visibleIds.contains(relation.to)) {
+        continue;
+      }
       final a = positions[relation.from], b = positions[relation.to];
       if (a != null &&
           b != null &&
@@ -309,6 +385,7 @@ class _GraphPainter extends CustomPainter {
       }
     }
     for (final node in scene.nodes) {
+      if (!visibleIds.contains(node.id)) continue;
       final p = positions[node.id]!;
       final active = node.id == selected;
       final color = node.depth >= 2
@@ -376,7 +453,9 @@ class _GraphPainter extends CustomPainter {
       yaw != old.yaw ||
       pitch != old.pitch ||
       zoom != old.zoom ||
+      pan != old.pan ||
       selected != old.selected ||
       enabledEdges != old.enabledEdges ||
+      visibleIds != old.visibleIds ||
       scene != old.scene;
 }

@@ -600,9 +600,11 @@ Windows App builds. The only failed jobs were iOS App build and iOS Simulator,
 both stopping during CocoaPods setup because `firebase_core` requires a minimum
 iOS deployment target of 15.0 while `ios/Podfile` and the Xcode project target
 13.0. This is a product compatibility decision, not a passing iOS check. The
-coordination viewer workflow run `39531455535` also passed. These runs prove
-the listed CI targets only; they do not prove production resource publication,
-physical iOS lifecycle, or production-CDN delivery.
+coordination viewer workflow run `39531455535` passed, and workspace validation
+run `39557557746` passed on Node 20 and 22 after checking out the pinned
+frontend/backend peer commits needed by cross-repository boundary tests. These
+runs prove the listed CI targets only; they do not prove production resource
+publication, physical iOS lifecycle, or production-CDN delivery.
 
 The workflow additionally analyzes/tests the in-repository shared Dart
 packages and runs `integration_test/game_resource_native_lifecycle_test.dart`

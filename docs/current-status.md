@@ -496,12 +496,14 @@ alongside protocol version, ruleset version, and gameplay-content digest; the
 room pins the full contract and rejects a mismatch before adding a player.
 
 Remote verification on 2026-10-21: coordination viewer workflow run
-`39531455535` passed. Frontend workflow run `39533157819` passed Archery and
-Mini Royale package checks on Ubuntu/Windows/macOS; both in-repo shared Dart
-packages; Web IndexedDB storage; game-module consumer tests; Android API 35
-resource lifecycle; native resource lifecycle on Ubuntu/Windows/macOS; and
-Web/Android/Linux/macOS/Windows app builds. Its iOS app build and simulator
-jobs failed against the then-configured iOS 13 target. The product decision on
-2026-10-21 sets the minimum iOS deployment target to 26.0; a new workflow run
-must validate iOS build and simulator setup. Production signing keys, catalog
-publication, D1/KV deployment, and release remain unconfigured and unperformed.
+`39531455535` passed. Frontend run `39560967185` passed all 17 jobs on commit
+`f46c4d0da933c4773533fc288fb36bbfc8ce4ed8`, with iOS minimum target 26.0. The
+unsigned iOS device build passed; Android API 35 and iOS Simulator each passed
+the native lifecycle integration test (install, rollback, update, restart
+restore, removal). Web, Android, macOS, Windows, and Linux App builds passed,
+as did game package, shared Dart package, consumer, Web IndexedDB, and native
+host-storage lifecycle checks. The earlier run `39533157819` failed the iOS
+jobs because the app target was iOS 13; that historical result was resolved by
+the new product decision and CI evidence. Production signing keys, trust-key
+provisioning, catalog publication, D1/KV deployment, and release remain
+unconfigured and unperformed.

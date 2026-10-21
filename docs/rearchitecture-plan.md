@@ -1,6 +1,6 @@
 # Taiwan Brawl rearchitecture plan
 
-Status: messaging/App refactor slice implemented; approved game-module architecture remains in active migration. Archery and Mini Royale are separately versioned Flutter packages. Mini Royale now owns its manifest, models, rules, persistence contracts, lobby/deck UI, and complete interactive arena screen; the App supplies API, social, localization, resource, and host-navigation adapters. Optional resource lifecycle, signatures, offline catalog persistence, and multiplayer compatibility gates are implemented. Bundled game adapters now register once per module, and the host derives catalog, route, Home, Game Library, and resource-validator contributions from that registration list. The production catalog is still unpublished. iOS minimum support is now set to 26.0 by product decision; validate app build and simulator on CI. Production trust-key/catalog provisioning remains a release gate.
+Status: messaging/App refactor slice implemented; approved game-module architecture remains in active migration. Archery and Mini Royale are separately versioned Flutter packages. Mini Royale now owns its manifest, models, rules, persistence contracts, lobby/deck UI, and complete interactive arena screen; the App supplies API, social, localization, resource, and host-navigation adapters. Optional resource lifecycle, signatures, offline catalog persistence, and multiplayer compatibility gates are implemented. Bundled game adapters now register once per module, and the host derives catalog, route, Home, Game Library, and resource-validator contributions from that registration list. The production catalog is still unpublished. iOS minimum support is 26.0; unsigned iOS App build plus Android API 35 and iOS Simulator resource lifecycle CI now pass. Production trust-key/catalog provisioning and release publication remain outstanding.
 
 Room invitations now persist an authoritative `game_id` (legacy rows migrate as
 `game.mini-royale`), and overview/action responses carry `gameId`. The Home
@@ -605,6 +605,17 @@ run `39557557746` passed on Node 20 and 22 after checking out the pinned
 frontend/backend peer commits needed by cross-repository boundary tests. These
 runs prove the listed CI targets only; they do not prove production resource
 publication, physical iOS lifecycle, or production-CDN delivery.
+
+Updated remote verification on 2026-10-21: frontend run `39560967185` passed all
+17 jobs on commit `f46c4d0da933c4773533fc288fb36bbfc8ce4ed8` with iOS 26 as the
+minimum target. The unsigned iOS device build completed. Android API 35 and iOS
+Simulator each passed the native resource lifecycle integration test covering
+install, forced rollback, update, restart restore, and removal. The same run
+passed Web, Android, macOS, Windows, and Linux app builds; Archery/Mini Royale
+package matrices; shared Dart packages; game-module consumers; Web IndexedDB;
+and native host-storage lifecycle checks on Ubuntu, macOS, and Windows. These
+CI results do not establish signed iOS distribution, physical-device testing,
+production trust-key/catalog publication, or production delivery.
 
 The workflow additionally analyzes/tests the in-repository shared Dart
 packages and runs `integration_test/game_resource_native_lifecycle_test.dart`

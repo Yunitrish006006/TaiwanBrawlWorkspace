@@ -82,7 +82,7 @@
         "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <Android-emulator-id>",
         "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <iOS-simulator-id>"
       ],
-      "notes": "Requires Android Emulator or iOS Simulator and the integration_test Flutter SDK package. Using Hive platform storage and injected HTTP/signature fixtures, the test installs v1, forces update migration failure and verifies v1 rollback, installs v2, closes/reopens Hive and verifies selected module plus installed bytes/version, then removes the resource while keeping the module enabled. GitHub run 39533157819 passed on Android API 35. Product decision on 2026-10-21 sets the app minimum iOS target to 26.0; validate simulator execution in the next CI run."
+      "notes": "Requires Android Emulator or iOS Simulator and the integration_test Flutter SDK package. Using Hive platform storage and injected HTTP/signature fixtures, the test installs v1, forces update migration failure and verifies v1 rollback, installs v2, closes/reopens Hive and verifies selected module plus installed bytes/version, then removes the resource while keeping the module enabled. GitHub run 39560967185 passed on Android API 35 and iOS Simulator with the minimum iOS target set to 26.0. This is emulator/simulator evidence, not physical-device or production-catalog validation."
     },
     {
       "id": "frontend-platform-builds",
@@ -99,7 +99,7 @@
         "flutter build windows --debug",
         "flutter build linux --debug"
       ],
-      "notes": "GitHub run 39533157819 passed Web, Android APK, Linux, Windows, and macOS builds. The macOS workflow uses generated Flutter config plus xcodebuild with signing disabled. Product decision on 2026-10-21 sets iOS minimum deployment target to 26.0; the next CI run must verify the iOS build."
+      "notes": "GitHub run 39560967185 passed Web, Android APK, unsigned iOS device build (minimum iOS 26.0), Linux, Windows, and macOS builds. The macOS workflow uses generated Flutter config plus xcodebuild with signing disabled. This does not verify signed App Store distribution."
     },
     {
       "id": "frontend-webrtc-runtime",

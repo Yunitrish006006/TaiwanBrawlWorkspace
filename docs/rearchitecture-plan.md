@@ -1,6 +1,6 @@
 # Taiwan Brawl rearchitecture plan
 
-Status: messaging/App refactor slice implemented; approved game-module architecture remains in active migration. Archery and Mini Royale are separately versioned Flutter packages. Mini Royale now owns its manifest, models, rules, persistence contracts, lobby/deck UI, and complete interactive arena screen; the App supplies API, social, localization, resource, and host-navigation adapters. Optional resource lifecycle, signatures, offline catalog persistence, and multiplayer compatibility gates are implemented. Bundled game adapters now register once per module, and the host derives catalog, route, Home, Game Library, and resource-validator contributions from that registration list. The production catalog is still unpublished, and native Android/iOS/macOS delivery validation remains open.
+Status: messaging/App refactor slice implemented; approved game-module architecture remains in active migration. Archery and Mini Royale are separately versioned Flutter packages. Mini Royale now owns its manifest, models, rules, persistence contracts, lobby/deck UI, and complete interactive arena screen; the App supplies API, social, localization, resource, and host-navigation adapters. Optional resource lifecycle, signatures, offline catalog persistence, and multiplayer compatibility gates are implemented. Bundled game adapters now register once per module, and the host derives catalog, route, Home, Game Library, and resource-validator contributions from that registration list. The production catalog is still unpublished. Remote CI now verifies Android API 35 resource lifecycle and Web/Android/Linux/macOS/Windows builds; iOS build and simulator remain blocked because the current Firebase Core dependency requires iOS 15 while the App target is iOS 13. The iOS support decision and production trust-key/catalog provisioning remain release gates.
 
 Room invitations now persist an authoritative `game_id` (legacy rows migrate as
 `game.mini-royale`), and overview/action responses carry `gameId`. The Home
@@ -585,18 +585,26 @@ selection, catalog metadata, active version pointer, and payload bytes. These
 prove browser IndexedDB and host file-store persistence respectively, not
 Android/iOS device delivery or production-CDN publication.
 
-A native-runner GitHub Actions matrix is now configured for Ubuntu, Windows,
-and macOS. It checks out the independently versioned Archery and Mini Royale
-packages with the pinned public `user_ui_settings` dependency, then runs
-`flutter analyze` and `flutter test` for each package. A separate Ubuntu Chrome
-job now runs the IndexedDB persistence and resource installer suites. A full
-App build matrix has also been added for Web, Android (Temurin JDK 17), iOS
-without code signing, macOS, Windows, and Linux. The workflow has only been
-syntax-checked locally and has not yet run on GitHub; it is intended to verify
-package and App compilation, plus Web persistence, but will not by itself prove
-native resource-store installation/update/rollback on each target.
+A native-runner GitHub Actions matrix checks out the independently versioned
+Archery and Mini Royale packages with the pinned public `user_ui_settings`
+dependency, then runs `flutter analyze` and `flutter test` for each package. A
+separate Ubuntu Chrome job runs the IndexedDB persistence and resource
+installer suites. The App build matrix covers Web, Android (Temurin JDK 17),
+iOS without code signing, macOS, Windows, and Linux. GitHub Actions run
+`39533157819` on frontend branch `codex/taiwan-brawl-modular-ci` (commit
+`c8ebf62e141dbd25171e9cbe85e26e85b3ea2b3e`) passed the Archery/Mini Royale
+package matrices on Ubuntu, Windows, and macOS; shared Dart packages; Web
+IndexedDB; game-module consumer tests; Android API 35 native resource lifecycle;
+native resource lifecycle on Ubuntu/Windows/macOS; and Web/Android/Linux/macOS/
+Windows App builds. The only failed jobs were iOS App build and iOS Simulator,
+both stopping during CocoaPods setup because `firebase_core` requires a minimum
+iOS deployment target of 15.0 while `ios/Podfile` and the Xcode project target
+13.0. This is a product compatibility decision, not a passing iOS check. The
+coordination viewer workflow run `39531455535` also passed. These runs prove
+the listed CI targets only; they do not prove production resource publication,
+physical iOS lifecycle, or production-CDN delivery.
 
-The workflow now additionally analyzes/tests the in-repository shared Dart
+The workflow additionally analyzes/tests the in-repository shared Dart
 packages and runs `integration_test/game_resource_native_lifecycle_test.dart`
 on an Android API 35 emulator and an iOS Simulator. The test restores selected
 module state, installs v1, forces a v2 migration failure and verifies the v1
@@ -606,7 +614,9 @@ game enabled. HTTP and signature verification are injected fixtures, while
 Hive uses the target platform's app storage. The workflow path filters include
 `integration_test/**`. Workflow YAML and its iOS shell script parse locally,
 but no GitHub Actions run has yet provided Android/iOS device execution
-evidence; platform acceptance remains open until those jobs pass.
+evidence. The Android API 35 emulator job passed in run `39533157819`. The iOS
+Simulator job could not reach the test because CocoaPods rejected the current
+iOS 13 target against `firebase_core`'s iOS 15 minimum; it remains unverified.
 
 Local owner/consumer verification on 2026-10-21 passed: the frontend app
 `flutter analyze`, the complete frontend `flutter test` suite (186 passed, 1
@@ -623,10 +633,9 @@ passed, 1 VM-only filesystem restart test skipped). That Hive restart test was
 then run on the VM platform and passed as part of the 23-test installer suite;
 the skip is platform-scoped, not a loss of persistence coverage.
 
-The follow-up environment audit on 2026-10-21 found no GitHub Actions runs for
+The initial environment audit on 2026-10-21 found no GitHub Actions runs for
 the frontend repository (`actions/runs` returned `total_count: 0`). The local
-local workflow YAML parsed successfully, and `bash -n tool/build_web.sh`
-passed. The local Android APK build was attempted but Gradle exited with
+workflow YAML parsed successfully, and `bash -n tool/build_web.sh` passed. The local Android APK build was attempted but Gradle exited with
 `25.0.3`; this host only has Temurin JDK 25, while the supported build matrix
 deliberately pins JDK 17. An Android AVD definition exists, but the ADB device
 list was empty; the sandbox cannot start the ADB daemon. The host also has only

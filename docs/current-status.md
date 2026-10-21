@@ -1,6 +1,6 @@
 # Current status
 
-Workspace snapshot date: **2026-10-21**. The repository-head table below remains the verified baseline snapshot; the local migration changes listed in this document are intentionally uncommitted and are not represented as remote heads.
+Workspace snapshot date: **2026-10-21**. The repository-head table below remains the verified `main` baseline snapshot. The architecture migration is committed to dedicated `codex/taiwan-brawl-modular-ci` branches in the coordination, frontend, and backend repositories; those feature-branch heads and CI evidence are recorded in the rearchitecture plan and are not represented as `main` heads.
 
 The messaging/app refactor slice is implemented. The optional feature/game
 architecture is documented and implementation has started. Archery's Flutter
@@ -494,3 +494,14 @@ the migration has not been applied to a deployed D1 database.
 Room admission now includes the bundled game module version and ruleset identity
 alongside protocol version, ruleset version, and gameplay-content digest; the
 room pins the full contract and rejects a mismatch before adding a player.
+
+Remote verification on 2026-10-21: coordination viewer workflow run
+`39531455535` passed. Frontend workflow run `39533157819` passed Archery and
+Mini Royale package checks on Ubuntu/Windows/macOS; both in-repo shared Dart
+packages; Web IndexedDB storage; game-module consumer tests; Android API 35
+resource lifecycle; native resource lifecycle on Ubuntu/Windows/macOS; and
+Web/Android/Linux/macOS/Windows app builds. The only failing jobs were iOS app
+build and iOS Simulator setup: `firebase_core` requires iOS 15 while the
+checked-in Podfile/Xcode project target iOS 13. iOS 13/14 support is unchanged
+pending the user's compatibility decision. Production signing keys, catalog
+publication, D1/KV deployment, and release remain unconfigured and unperformed.

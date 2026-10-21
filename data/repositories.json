@@ -25,7 +25,7 @@
         "WebSocket",
         "Firebase Cloud Messaging"
       ],
-      "role": "跨平台使用者介面、社交/聊天體驗、Royale 對戰 UI 與 FCM client。"
+      "role": "跨平台使用者介面、社交/聊天體驗、遊戲 package 組合與 FCM client；遊戲 package 逐步承接各自的領域規則與版本契約。"
     },
     {
       "id": "taiwan-brawl-back",
@@ -78,6 +78,36 @@
         "Dart"
       ],
       "role": "可重用 profile 與 DM chat system abstraction；前端以 package dependency 引用。"
+    },
+    {
+      "id": "taiwan-brawl-core",
+      "name": "taiwan_brawl_core",
+      "kind": "shared-flutter-package",
+      "active": true,
+      "repository": null,
+      "defaultBranch": null,
+      "commit": null,
+      "headDate": null,
+      "version": "0.1.0",
+      "stack": [
+        "Dart 3.11"
+      ],
+      "role": "共用無平台 runtime configuration；source 位於 taiwan_brawl_front/packages/shared/taiwan_brawl_core，由 frontend repository 版控；敏感 credential、device key 與 provider token 不由此 package 保存。"
+    },
+    {
+      "id": "taiwan-brawl-messaging",
+      "name": "taiwan_brawl_messaging",
+      "kind": "shared-dart-package",
+      "active": true,
+      "repository": null,
+      "defaultBranch": null,
+      "commit": null,
+      "headDate": null,
+      "version": "0.1.0",
+      "stack": [
+        "Dart 3.11"
+      ],
+      "role": "共用 offline-first messaging event、identity/storage ports、projection、outbox 與 transport primitives；source 位於 taiwan_brawl_front/packages/shared/taiwan_brawl_messaging，由 frontend repository 版控；保持 Flutter/Hive/HTTP/WebRTC 無關。"
     }
   ]
 }

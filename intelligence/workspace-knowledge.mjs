@@ -24,6 +24,18 @@ const vocabulary = {
   ui: ["theme", "locale", "ui", "字體", "主題", "語系"],
 };
 
+const genericTaskTerms = new Set([
+  "change",
+  "modify",
+  "package",
+  "shared",
+  "update",
+  "修改",
+  "更新",
+  "套件",
+  "共用",
+]);
+
 export function resolveTask(text) {
   const q = String(text || "").toLowerCase();
   const focus = Object.entries(vocabulary)
@@ -32,12 +44,25 @@ export function resolveTask(text) {
   const workspace = loadWorkspace();
   const contractMatches = workspace.contracts.contracts.filter((contract) => {
     const blob = JSON.stringify(contract).toLowerCase();
-    return focus.some((term) => hasTerm(blob, term)) || q.split(/\s+/).filter(Boolean).some((term) => term.length > 2 && hasTerm(blob, term));
+    return focus.some((term) => hasTerm(blob, term)) || q
+      .split(/\s+/)
+      .filter(Boolean)
+      .some((term) => term.length > 2 && !genericTaskTerms.has(term) && hasTerm(blob, term));
   });
-  const repoIds = new Set(contractMatches.flatMap((c) => [...c.owners, ...c.consumers]));
+  const packageMatches = workspace.repositories.repositories
+    .filter((repo) => repo.kind.endsWith("package"))
+    .filter((repo) => {
+      const terms = [repo.id, repo.name].flatMap((value) => value.split(/[-_]/));
+      return terms.some((term) => term.length > 2 && hasTerm(q, term));
+    });
+  const selectedContracts = packageMatches.length > 0
+    ? contractMatches.filter((contract) => packageMatches.some((repo) =>
+      contract.owners.includes(repo.id) || contract.consumers.includes(repo.id)))
+    : contractMatches;
+  const repoIds = new Set(selectedContracts.flatMap((c) => [...c.owners, ...c.consumers]));
   if (focus.includes("ui")) repoIds.add("user-ui-settings");
   if (focus.includes("deploy")) repoIds.add("taiwan-brawl-back");
-  return { query: text, focus, repositories: [...repoIds], contracts: contractMatches.map((c) => c.id) };
+  return { query: text, focus, repositories: [...repoIds], contracts: selectedContracts.map((c) => c.id) };
 }
 
 export function impactForRepository(repoId) {
@@ -54,9 +79,15 @@ export function testPlanForTask(text) {
   const tags = new Set(["data-change"]);
   if (signals.changesBehavior) {
     if (signals.contract) tags.add("contract-change");
+    if (signals.gameModule) tags.add("game-module-change");
     if (resolved.repositories.includes("taiwan-brawl-front")) tags.add("frontend-change");
     if (resolved.repositories.includes("taiwan-brawl-back")) tags.add("backend-change");
-    if (resolved.repositories.some((id) => id.startsWith("user-"))) tags.add("shared-flutter-package-change");
+    const sharedPackageIds = workspace.repositories.repositories
+      .filter((repo) => repo.kind.endsWith("package"))
+      .map((repo) => repo.id);
+    if (resolved.repositories.some((id) => sharedPackageIds.includes(id))) {
+      tags.add("shared-flutter-package-change");
+    }
     if (resolved.focus.includes("deploy")) tags.add("deployment-change");
   }
   const categories = workspace.testMatrix.categories.filter((entry) =>

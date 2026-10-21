@@ -2,6 +2,88 @@
   "schemaVersion": 1,
   "contracts": [
     {
+      "id": "optional-game-modules",
+      "owners": [
+        "taiwan-brawl-front"
+      ],
+      "consumers": [
+        "taiwan-brawl-back"
+      ],
+      "surface": [
+        "GameModuleManifest schema version, kind, publisher, package/shell versions, host API range, dependencies, and data schema version",
+        "optional multiplayer protocol/rules/content manifest",
+        "Mini Royale gameplay-rules JSON schema v1 (bounded simulation tuning data; no executable code)",
+        "optional payloadSchemaVersion for downloaded resource decoder formats, separate from resource semver and module player-data schema",
+        "supported platform declarations for bundled modules and downloadable resource packs",
+        "optional resource activationGroup and module-scoped atomic active-set lifecycle",
+        "game-owned optional resource manifest and install lifecycle",
+        "GET /api/games/catalog",
+        "GET /game-resources/:moduleId/:resourceId/:version"
+      ],
+      "invariants": [
+        "each bundled game package owns its stable module identity, package version, and data schema version",
+        "each game's local player data uses its own package-owned schema/migrations, profile-scoped keys, and isolated persistence box; one game's repository cannot read or overwrite another game's records",
+        "same-record player-data reads, writes, deletes, and schema migrations are serialized so a delayed migration cannot overwrite a newer player save",
+        "game-owned D1 tables and indexes use a stable game namespace; migrations preserve existing rows/identity and shared users/sessions remain infrastructure rather than game data",
+        "each package-owned module manifest packageVersion must match that Flutter package's pubspec version",
+        "frontend manifests and backend catalog/resource routes apply strict SemVer 2.0 validation; precedence ignores build metadata and follows prerelease ordering",
+        "each game manifest declares a supported manifest version, publisher, host API version range, and unique typed module/resource dependencies",
+        "required module dependencies must be enabled and version-compatible before activation, and cannot be disabled while an enabled dependent requires them",
+        "required resource dependencies must be installed, digest-verified, and version-compatible before pack activation; required dependencies cannot be removed while an enabled module or installed pack depends on them",
+        "resource dependency version ranges are evaluated against the installed version, not forced to the newest catalog version; installer activation also verifies the active pointer and bytes against the installed digest",
+        "resources sharing activationGroup install and remove as a unit; all members are staged, verified, and migrated before a single module active-set pointer changes, and a failed member preserves the prior active set",
+        "single-player modules may omit the multiplayer contract; multiplayer modules declare protocol range, ruleset identity/version, and gameplay content digest",
+        "Mini Royale gameplay rule packs use the package-owned schema and finite server-validated bounds; executable code is never accepted as a resource",
+        "Mini Royale package resolves the room-pinned gameplay-resource contract, active version, digest, JSON schema, and ruleset identity through a package-owned source port; the App adapter exposes local bytes and version only",
+        "resource payloadSchemaVersion, when published, is a positive integer persisted with the installed resource record and is not interchangeable with packageVersion, resource version, dataSchemaVersion, or multiplayer protocol/ruleset versions",
+        "a declared resource payloadSchemaVersion must match the exact schema supported by its bundled game package before the resource enters the usable catalog",
+        "the app catalog composes package-owned manifests and must not become the source of game identity/version values",
+        "remote resource metadata cannot overwrite the bundled multiplayer compatibility baseline",
+        "the backend validates published module and resource manifest structure before serving the catalog; the App independently validates and cryptographically verifies downloaded payloads",
+        "non-empty catalogs are publisher-bound Ed25519 envelopes with expiry; unknown keys, expired envelopes, mismatched publishers, and unsigned catalogs fail closed",
+        "the Worker's unsigned empty unpublished-catalog placeholder preserves the last verified offline catalog; a publisher-verified snapshot is authoritative even when empty, revokes omitted download metadata, and retains installed bytes only for offline inspection/removal",
+        "the verified catalog expiry is persisted atomically with its cached manifests; expired offline metadata cannot authorize downloads or updates, while local inspection and removal remain available",
+        "the signed catalog issue time is persisted with the cache, and a snapshot older than the last verified issue time is rejected so a still-valid stale envelope cannot roll back a revocation",
+        "cached catalog manifests are not trusted by themselves on restart; the original publisher-signed envelope must be reverified with configured trust keys, while expired signed metadata is inspection-only and installed local tombstones survive invalid or unknown signatures",
+        "player-selected content is verified before activation and does not install executable game code"
+      ],
+      "validation": [
+        "game package manifest tests",
+        "flutter test test/game_library_controller_test.dart test/game_module_routes_test.dart test/game_player_data_isolation_test.dart test/game_resource_catalog_source_test.dart test/game_library_store_test.dart",
+        "Mini Royale package and backend gameplay-rules schema tests",
+        "backend catalog and immutable resource endpoint tests"
+      ]
+    },
+    {
+      "id": "shared-messaging-primitives",
+      "owners": [
+        "taiwan-brawl-messaging"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "MessageEvent and MessageProjection",
+        "MessageRepository and durable outbox/inbox ports",
+        "MessageTransport and MessageSyncEngine",
+        "CredentialStore, DeviceIdentity, and DeviceIdentityDirectory",
+        "PeerSignalingChannel and provider-neutral PushProvider"
+      ],
+      "invariants": [
+        "shared package has no Flutter, Hive, HTTP, WebRTC, Firebase, or Cloudflare dependency",
+        "local commands project immediately and retain unsent events in the outbox",
+        "remote events are validated before projection and can be durably replayed through inbox storage",
+        "malformed persisted event, outbox, or inbox records are isolated as durable conflicts without aborting the remaining local restore",
+        "a durable outbox record can recover a missing main event row after an interrupted local write",
+        "platform credentials, encryption keys, and peer trust material are supplied through ports",
+        "transport implementations can be replaced without changing event commands or projections"
+      ],
+      "validation": [
+        "shared messaging package tests",
+        "frontend messaging consumer tests"
+      ]
+    },
+    {
       "id": "auth-session",
       "owners": [
         "taiwan-brawl-back"
@@ -18,11 +100,41 @@
       "invariants": [
         "Web session may use cookie",
         "non-Web clients may use Authorization: Bearer <session_id>",
-        "session TTL documented as 30 days"
+        "session TTL documented as 30 days",
+        "non-Web session credentials are persisted through the shared CredentialStore port",
+        "credential storage failures do not change the Web cookie contract",
+        "frontend authentication and profile application logic consume a replaceable remote source rather than encoding HTTP paths directly"
       ],
       "validation": [
         "backend auth tests",
         "frontend login smoke test"
+      ]
+    },
+    {
+      "id": "runtime-configuration",
+      "owners": [
+        "taiwan-brawl-core"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "AppConfiguration.apiBaseUrl",
+        "AppConfiguration.googleWebClientId",
+        "AppConfiguration.googleServerClientId",
+        "AppConfiguration.p2pChatEnabled",
+        "AppConfiguration.peerVerificationEnabled"
+      ],
+      "invariants": [
+        "configuration is injected by the composition root and has no Flutter, HTTP, Hive, Firebase, or WebRTC dependency",
+        "OAuth client identifiers and feature flags come from deployment configuration or explicit test values",
+        "backend Google OAuth audience allow-list is supplied by GOOGLE_CLIENT_ID(S) and has no repository fallback",
+        "session tokens, provider API keys, and device secrets are not stored in this package",
+        "frontend keeps a compatibility import while consumers migrate to the shared package"
+      ],
+      "validation": [
+        "shared core package compiles through frontend dependency resolution",
+        "frontend configuration injection test"
       ]
     },
     {
@@ -36,18 +148,105 @@
       ],
       "surface": [
         "POST /api/chat/dm/:friendId/send",
+        "POST /api/chat/dm/:friendId/event",
         "GET /api/chat/dm/pending",
+        "GET /api/chat/dm/pending?friendId=:friendId&afterId=:cursor",
         "POST /api/chat/dm/ack",
         "GET /api/chat/dm/:friendId/history"
       ],
       "invariants": [
         "pending_messages polling is current primary receive path",
         "push is notification, not source of truth",
-        "CHAT_ROOM exists but client is not socket-first"
+        "background pending polling and acknowledgement are owned by a replaceable frontend source adapter",
+        "CHAT_ROOM exists but client is not socket-first",
+        "the additive event route preserves eventId, messageId, revision, event type, and signature metadata",
+        "event envelopes may carry optional deviceId metadata without changing actorId account authorization",
+        "created, edited, recalled, and read event types share the same envelope",
+        "repeated eventId is idempotent only when the stored event payload matches; collisions return conflict",
+        "connected event writes are attempted before legacy fallback; only route-not-found responses permit fallback",
+        "an event created while the sync engine is disconnected remains local and does not trigger a legacy HTTP request",
+        "legacy send/recall routes remain available during migration",
+        "legacy history, snapshot sync, send, and recall HTTP calls are isolated behind a replaceable frontend remote source",
+        "legacy local history is promoted into shared event projections before new edit and recall commands",
+        "legacy history promotion merges compatibility rows even when the shared projection is already partially populated",
+        "cursor-enabled polling is friend-scoped and advances only after the returned rows are acknowledged",
+        "the relay database has a receiver/sender/id index matching the friend-scoped cursor query",
+        "the local cursor is transport state and is persisted independently from message projections",
+        "relay acknowledgement occurs after local durable ingestion; local ingestion failure leaves the remote row retryable",
+        "local events use the shared device signer; live, downloaded, and background-notification remote events use an optional trusted verifier before projection"
       ],
       "validation": [
         "backend chat tests",
-        "frontend polling/ack behavior"
+        "frontend offline-first consumer tests",
+        "frontend polling/ack behavior",
+        "frontend encrypted restore and cursor tests",
+        "shared messaging package tests",
+        "frontend composition boundary tests"
+      ]
+    },
+    {
+      "id": "friends-social",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "GET /api/friends/overview",
+        "GET /api/friends/search",
+        "POST /api/friends/requests",
+        "POST /api/friends/requests/:id/(accept|reject|cancel)",
+        "DELETE /api/friends/:userId",
+        "POST /api/friends/block",
+        "DELETE /api/friends/block/:userId",
+        "POST /api/games/:gameSlug/v1/rooms/:code/invite",
+        "POST /api/rooms/:code/invite",
+        "POST /api/room-invites/:id/(accept|reject)"
+      ],
+      "invariants": [
+        "frontend friendship application logic consumes a replaceable remote source",
+        "overview polling remains lifecycle-aware and deduplicates unchanged snapshots",
+        "friendship authorization remains server-owned",
+        "room invitations persist and return a gameId; legacy rows default to game.mini-royale",
+        "new room invitations use the owning game's versioned API namespace, whose backend owner determines gameId",
+        "Home dispatches invites through the owning game module and never assumes every invite belongs to Mini Royale"
+      ],
+      "validation": [
+        "backend friend route tests",
+        "backend game API path and room invite game contract tests",
+        "frontend friends remote-source tests",
+        "frontend room invite game contract tests",
+        "frontend home and arena consumer tests"
+      ]
+    },
+    {
+      "id": "admin-management",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "GET /api/admin/users",
+        "PUT /api/admin/users/:id/role",
+        "GET /api/cards",
+        "POST /api/admin/cards",
+        "POST /api/admin/cards/:cardId/(image|bg-image|character-images/:direction|character-assets/:assetId)",
+        "DELETE /api/admin/cards/:cardId/(image|bg-image|character-images/:direction|character-assets/:assetId)",
+        "DELETE /api/admin/cards/:cardId"
+      ],
+      "invariants": [
+        "frontend admin application logic consumes a replaceable AdminRemoteSource",
+        "server adapter owns HTTP endpoint paths while AdminService owns model parsing",
+        "admin authorization and mutation validation remain server-owned",
+        "constructor compatibility is preserved while local or offline management sources can be introduced"
+      ],
+      "validation": [
+        "backend admin route tests",
+        "frontend admin remote-source tests",
+        "frontend admin page tests"
       ]
     },
     {
@@ -67,12 +266,52 @@
       ],
       "invariants": [
         "Android/iOS/macOS/Web provider is FCM",
-        "invalid FCM tokens can be invalidated server-side"
+        "invalid FCM tokens can be invalidated server-side",
+        "frontend application services depend on the shared PushProvider contract rather than Firebase Messaging globals",
+        "notification configuration and device registration HTTP calls are isolated behind a replaceable frontend remote source",
+        "push messages are notification hints and never the durable direct-message source of truth"
       ],
       "validation": [
         "backend push tests",
         "frontend PushConfiguration tests",
+        "shared messaging package tests",
         "web service worker smoke check"
+      ]
+    },
+    {
+      "id": "direct-message-signaling",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-brawl-front"
+      ],
+      "surface": [
+        "WebSocket /api/chat/signal/:friendId",
+        "offer / answer / ice_candidate payloads"
+      ],
+      "invariants": [
+        "SIGNAL_ROOM relays negotiation data only",
+        "signaling is transient and never the durable message source of truth",
+        "message events continue through the shared MessageTransport contract",
+        "frontend signaling is replaceable by a manual or local out-of-band channel",
+        "manual signaling exchanges offer, answer, and ICE negotiation payloads only",
+        "the migrated DM page exposes manual bundle preparation, import/export, refresh, and completion without changing the hosted transport default",
+        "manual bundle import may require the expected session and sender device identity",
+        "peer verification is opt-in through an explicitly fingerprint-confirmed serverless trust invitation and trusted device directory",
+        "trusted peer material supports revocation and is never inferred from a deviceId alone",
+        "the current invitation protocol is an HMAC migration bridge and does not claim automatic key exchange or public-key security",
+        "the DM pairing UI exposes invitation copy/paste, fingerprint review, and explicit trust confirmation",
+        "hosted composition keeps the default STUN configuration while local or LAN composition may inject iceServers: []",
+        "injectable ICE configuration is an offline/LAN capability boundary, not evidence of NAT traversal success",
+        "Chrome loopback runtime coverage proves two browser DataChannels can exchange an event with local ICE configuration, but does not prove physical-device connectivity, Internet NAT traversal, or hosted signaling",
+        "the server relay remains available as a migration fallback"
+      ],
+      "validation": [
+        "backend SignalRoom route tests",
+        "frontend P2P transport and fallback tests",
+        "Chrome two-peer WebRTC loopback runtime test",
+        "physical-device and Internet-NAT runtime test required before production P2P claim"
       ]
     },
     {
@@ -84,6 +323,14 @@
         "taiwan-brawl-front"
       ],
       "surface": [
+        "GET /api/games/mini-royale/v1/cards",
+        "GET /api/games/mini-royale/v1/heroes",
+        "GET /api/games/mini-royale/v1/progression",
+        "GET|POST /api/games/mini-royale/v1/decks",
+        "POST /api/games/mini-royale/v1/decks/hero",
+        "POST /api/games/mini-royale/v1/rooms",
+        "POST /api/games/mini-royale/v1/rooms/:code/join",
+        "GET /api/games/mini-royale/v1/rooms/:code/ws",
         "POST /api/rooms",
         "POST /api/rooms/:code/join",
         "POST /api/rooms/:code/ready",
@@ -92,7 +339,33 @@
       ],
       "invariants": [
         "ROYALE_ROOM Durable Object owns realtime match state",
-        "match history is persisted to D1 after completion"
+        "versioned Mini Royale API namespace owns new game-client traffic; legacy paths are temporary compatibility aliases",
+        "cards, heroes, progression, and deck HTTP handlers are owned by the Mini Royale API module rather than the shared room API module",
+        "Mini Royale create/join/ready/rematch/state/WebSocket handlers are owned by the game room API module; the shared room facade keeps compatibility dispatch and social invites",
+        "Mini Royale arena social UI consumes a package-owned capability port; the App injects an adapter for authentication, friend storage, and search UI, and those App models/services do not cross into the game package",
+        "the Mini Royale arena consumes package-owned presentation and gameplay-rules source ports; the App composition route adapts its verified active-resource content store and the arena does not depend on the host resource-library service",
+        "Mini Royale UI consumes a package-owned localization port; the App adapts its shared locale provider and forwards locale-change notifications without exposing that provider type to the game screens",
+        "all arena entry routes share one App-owned dependency scope for Mini Royale contracts; lobby and invite navigation supply identical API, social, resource, and localization adapters",
+        "Mini Royale API failures cross the host HTTP adapter as package-owned service exceptions with structured status/body metadata; game UI does not catch App ApiException",
+        "the Mini Royale arena receives its host-shell exit action as a callback and contains no App route name or application-brand constant",
+        "the Mini Royale package owns the complete interactive arena screen, room-driven UI state, selection, and gesture orchestration; the App injects service, room connection, social, localization, resource, and exit-navigation capabilities through game-owned contracts",
+        "Mini Royale owns tower-position normalization and selected-card tower threat reach; the App scales these package results into rendered board coordinates",
+        "Mini Royale owns responsive immersive battle layout policy and field sizing; the App injects live room widgets and command callbacks without duplicating layout breakpoints",
+        "Mini Royale owns hand-card and discard-zone presentation; host localization, affordability, drag payload semantics, and room commands cross as typed inputs/callbacks",
+        "Mini Royale owns hand-card type, energy-category, and effect-summary derivation; the host supplies only localization and player-specific affordability values",
+        "Mini Royale owns mutable selected-card state, authoritative-hand reconciliation, selection ordering, and selection-derived drag payloads; the App owns widget lifecycle, board geometry, room commands, and transport effects",
+        "Mini Royale package owns the real-time play/discard command codec and host-command decoding; the App transports typed game commands and does not define game wire payloads",
+        "the bundled game package manifest is authoritative for game code, shell and data-schema identity; remote catalogs may update only that known game's resource metadata",
+        "resource removal persists a non-installed removing state before deleting cached bytes, so failed cleanup cannot remain multiplayer-compatible and can be retried",
+        "resource platform support must be a subset of its owning module's declared platforms; the App hides unavailable packs and blocks unsupported activation",
+        "room creation rejects missing or malformed client contracts before deck/room lookup, validates protocol support against the server-owned range, resolves exact gameplay resources, then pins the server's protocol policy with the verified gameplay identity",
+        "join and reconnect require mutual protocol-range compatibility plus exact ruleset ID/version and gameplay content identity before membership or socket upgrade; package version alone does not reject a compatible client",
+        "non-built-in gameplay contracts resolve only the exact signed-catalog resource tuple; Worker verifies publisher trust, expiry, immutable metadata, byte length, signature, and SHA-256 before persisting or simulating bounded rules",
+        "the Flutter host simulator delegates room-pinned resource/version/digest/ruleset validation to Mini Royale package logic via a replaceable source port; missing contracts, versions, or byte matches fail closed",
+        "each bundled multiplayer game declares protocol range, ruleset ID/version, and built-in gameplay digest in its package manifest; remote resource-catalog refresh cannot replace that bundled compatibility baseline",
+        "match history is persisted to D1 after completion",
+        "frontend Royale application logic consumes a replaceable remote source rather than encoding server HTTP and WebSocket transport directly",
+        "LLM bot decision and provider connectivity calls are replaceable at the application boundary"
       ],
       "validation": [
         "backend room/combat tests",

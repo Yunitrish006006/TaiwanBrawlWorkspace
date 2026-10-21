@@ -36,6 +36,7 @@
     "sensitive": ["auth", "authentication", "authorization", "permission", "session", "security", "schema", "migration", "protocol", "websocket", "登入", "權限", "資安", "資料庫遷移", "協定"],
     "crossRepository": ["cross-repo", "cross repository", "跨 repo", "跨庫", "前後端"],
     "contract": ["contract", "api", "schema", "protocol", "websocket", "migration", "契約", "協定", "資料庫遷移"],
+    "gameModule": ["game module", "game package", "gameplay resource", "game catalog", "archery", "mini royale", "遊戲模組", "遊戲套件", "玩法資源", "遊戲目錄"],
     "mechanical": ["format", "formatting", "rename", "格式化", "排版", "重新命名"]
   },
   "evidence": {

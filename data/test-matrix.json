@@ -27,6 +27,101 @@
       ]
     },
     {
+      "id": "archery-package",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change"
+      ],
+      "commands": [
+        "cd packages/games/archery && flutter analyze",
+        "cd packages/games/archery && flutter test"
+      ]
+    },
+    {
+      "id": "mini-royale-package",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change",
+        "contract-change"
+      ],
+      "commands": [
+        "cd packages/games/mini_royale && flutter analyze",
+        "cd packages/games/mini_royale && flutter test"
+      ]
+    },
+    {
+      "id": "frontend-game-module-consumers",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change",
+        "contract-change"
+      ],
+      "commands": [
+        "flutter test test/game_library_controller_test.dart test/game_library_page_test.dart test/game_module_routes_test.dart test/game_player_data_isolation_test.dart test/game_resource_catalog_source_test.dart test/game_library_store_test.dart test/game_resource_installer_test.dart"
+      ]
+    },
+    {
+      "id": "frontend-web-resource-storage",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change",
+        "contract-change"
+      ],
+      "commands": [
+        "flutter test --platform chrome test/game_resource_web_storage_test.dart test/game_resource_installer_test.dart"
+      ]
+    },
+    {
+      "id": "frontend-native-resource-storage-integration",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change",
+        "contract-change"
+      ],
+      "commands": [
+        "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <Android-emulator-id>",
+        "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <iOS-simulator-id>"
+      ],
+      "notes": "Requires Android Emulator or iOS Simulator and the integration_test Flutter SDK package. Using Hive platform storage and injected HTTP/signature fixtures, the test installs v1, forces update migration failure and verifies v1 rollback, installs v2, closes/reopens Hive and verifies selected module plus installed bytes/version, then removes the resource while keeping the module enabled."
+    },
+    {
+      "id": "frontend-platform-builds",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change",
+        "contract-change"
+      ],
+      "commands": [
+        "flutter build web --release",
+        "flutter build apk --debug (JDK 17)",
+        "flutter build ios --no-codesign",
+        "flutter build macos --debug",
+        "flutter build windows --debug",
+        "flutter build linux --debug"
+      ]
+    },
+    {
+      "id": "frontend-webrtc-runtime",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "p2p-runtime-change"
+      ],
+      "commands": [
+        "flutter test --platform chrome test/p2p_webrtc_runtime_test.dart"
+      ]
+    },
+    {
+      "id": "frontend-standalone-web-build",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "deployment-change"
+      ],
+      "commands": [
+        "bash -n tool/build_web.sh",
+        "FLUTTER_BIN_DIR=/path/to/flutter/bin ./tool/build_web.sh"
+      ]
+    },
+    {
       "id": "backend",
       "repository": "taiwan-brawl-back",
       "requiredFor": [
@@ -35,7 +130,8 @@
         "contract-change"
       ],
       "commands": [
-        "npm test"
+        "npm test",
+        "npm run db:migration:rehearse"
       ]
     },
     {
@@ -68,6 +164,30 @@
       "commands": [
         "flutter analyze",
         "flutter test"
+      ]
+    },
+    {
+      "id": "shared-messaging",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "shared-flutter-package-change",
+        "contract-change"
+      ],
+      "commands": [
+        "cd packages/shared/taiwan_brawl_messaging && dart analyze",
+        "cd packages/shared/taiwan_brawl_messaging && dart test"
+      ]
+    },
+    {
+      "id": "shared-core",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "shared-flutter-package-change",
+        "contract-change"
+      ],
+      "commands": [
+        "cd packages/shared/taiwan_brawl_core && dart analyze",
+        "cd packages/shared/taiwan_brawl_core && dart test"
       ]
     }
   ],

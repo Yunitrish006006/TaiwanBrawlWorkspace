@@ -8,6 +8,8 @@ TaiwanBrawlWorkspace 是 Taiwan Brawl 專案族的跨 repository 協作、架構
 - `taiwan_brawl_back` — Cloudflare Workers backend / integrated deployment
 - `user_ui_settings` — shared Flutter UI-settings package
 - `user_basic_system` — reusable profile / DM Flutter package
+- `taiwan_brawl_core` — platform-neutral runtime configuration package
+- `taiwan_brawl_messaging` — transport-neutral offline-first messaging package
 
 ## Repository map
 
@@ -75,6 +77,15 @@ Flutter build-time dependencies:
   taiwan_brawl_front
       +--> ../user_ui_settings
       +--> user_basic_system ^0.1.1
+      +--> ../taiwan_brawl_core
+      +--> ../taiwan_brawl_messaging
+
+Shared runtime boundaries:
+  taiwan_brawl_messaging
+      -> event/projection/repository/outbox/inbox
+      -> identity, credential, encryption, transport and push ports
+  taiwan_brawl_core
+      -> deployment configuration and feature flags only
 
 Integrated deployment:
   taiwan_brawl_back/deploy.sh

@@ -66,10 +66,21 @@ test("documents and inspections avoid unrelated product test suites", () => {
 test("behavior changes retain owner and consumer validation", () => {
   const plan = testPlanForTask("修改 Royale 房間 websocket");
   assert.ok(plan.tags.includes("contract-change"));
-  assert.deepEqual(plan.categories.map((entry) => entry.id), ["workspace", "frontend", "backend"]);
+  assert.deepEqual(plan.categories.map((entry) => entry.id), ["workspace", "frontend", "mini-royale-package", "frontend-game-module-consumers", "frontend-web-resource-storage", "frontend-native-resource-storage-integration", "frontend-platform-builds", "backend", "shared-messaging", "shared-core"]);
+  const archery = testPlanForTask("修改 Archery game package");
+  assert.ok(archery.tags.includes("game-module-change"));
+  assert.ok(archery.categories.some((entry) => entry.id === "archery-package"));
+  assert.ok(archery.categories.some((entry) => entry.id === "frontend-game-module-consumers"));
   const shared = testPlanForTask("修改 UI 主題");
   assert.ok(shared.categories.some((entry) => entry.id === "shared-ui-settings"));
   assert.ok(!shared.categories.some((entry) => entry.id === "shared-user-basic"));
+  const core = testPlanForTask("更新 runtime configuration shared package");
+  assert.ok(core.resolved.repositories.includes("taiwan-brawl-core"));
+  assert.ok(core.tags.includes("shared-flutter-package-change"));
+  const messaging = resolveTask("修改 shared messaging package");
+  assert.deepEqual(messaging.repositories, ["taiwan-brawl-messaging", "taiwan-brawl-front"]);
+  const messagingPlan = testPlanForTask("修改 shared messaging package");
+  assert.ok(messagingPlan.categories.some((entry) => entry.id === "shared-messaging"));
   assert.equal(testPlanForTask("修正未知功能").scopeNeedsInspection, true);
   assert.ok(testPlanForTask("更新 README 並修改登入").categories.some((entry) => entry.id === "backend"));
 });

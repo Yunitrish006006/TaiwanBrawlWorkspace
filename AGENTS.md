@@ -16,6 +16,8 @@ TaiwanBrawlWorkspace is the coordination and architecture-knowledge repository f
 - `taiwan_brawl_back` owns API contracts, D1 persistence, KV assets, Durable Objects, FCM server delivery, and integrated deployment.
 - `user_ui_settings` owns reusable theme/locale/font-scale providers.
 - `user_basic_system` owns reusable profile/DM abstractions used by the frontend package graph.
+- `taiwan_brawl_core` owns platform-neutral runtime configuration; it must not own session tokens, provider API keys, or device secrets.
+- `taiwan_brawl_messaging` owns transport-neutral messaging events, projections, identity/storage ports, and sync primitives; Flutter/platform adapters remain outside this package.
 
 ## Contract rules
 

@@ -13,7 +13,13 @@ try {
     const workspace = loadWorkspace();
     result = {
       snapshot: workspace.repositories.snapshot,
-      repositories: workspace.repositories.repositories.map(({ id, name, kind, version, commit }) => ({ id, name, kind, version, commit: commit.slice(0, 7) })),
+      repositories: workspace.repositories.repositories.map(({ id, name, kind, version, commit }) => ({
+        id,
+        name,
+        kind,
+        version,
+        commit: commit ? commit.slice(0, 7) : null,
+      })),
       contractCount: workspace.contracts.contracts.length,
       relationshipCount: workspace.relationships.relationships.length,
     };

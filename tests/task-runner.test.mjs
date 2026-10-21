@@ -56,7 +56,7 @@ test("tool task executes locally without a model and ignores another cwd", async
   const result = await executeTaskRun(run, { stateDirectory, stdout, stderr: output() });
   assert.equal(result.status, "process-completed");
   assert.equal(result.model, null);
-  assert.equal(JSON.parse(stdout.text).repositories.length, 4);
+  assert.equal(JSON.parse(stdout.text).repositories.length, 6);
 });
 
 test("one process receives literal task text; usage is recorded without prompts", async (t) => {

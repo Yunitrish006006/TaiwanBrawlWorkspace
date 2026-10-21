@@ -38,6 +38,22 @@
       "ownership": "shared package owns reusable profile/DM abstractions"
     },
     {
+      "id": "front-core-configuration",
+      "from": "taiwan-brawl-front",
+      "to": "taiwan-brawl-core",
+      "classification": "build-hard",
+      "protocol": "Dart path dependency packages/shared/taiwan_brawl_core (inside taiwan_brawl_front)",
+      "ownership": "shared package owns platform-neutral runtime configuration; composition roots inject values"
+    },
+    {
+      "id": "front-shared-messaging",
+      "from": "taiwan-brawl-front",
+      "to": "taiwan-brawl-messaging",
+      "classification": "build-hard",
+      "protocol": "Dart path dependency packages/shared/taiwan_brawl_messaging (inside taiwan_brawl_front)",
+      "ownership": "shared package owns transport-neutral messaging and identity/storage ports; frontend owns platform adapters"
+    },
+    {
       "id": "deploy-build-front",
       "from": "taiwan-brawl-back",
       "to": "taiwan-brawl-front",
@@ -71,7 +87,7 @@
       "from": "taiwan-brawl-front",
       "to": "external:firebase-fcm",
       "classification": "external-runtime",
-      "protocol": "firebase_messaging"
+      "protocol": "shared PushProvider contract + firebase_messaging adapter"
     },
     {
       "id": "back-fcm",

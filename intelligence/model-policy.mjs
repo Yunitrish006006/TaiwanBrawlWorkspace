@@ -1,7 +1,7 @@
 import fs from "node:fs";
 
 export const tierNames = ["tools", "economy", "standard", "deep", "expert"];
-const signalNames = ["documentation", "inspection", "mutation", "implementation", "complex", "sensitive", "crossRepository", "contract", "mechanical"];
+const signalNames = ["documentation", "inspection", "mutation", "implementation", "complex", "sensitive", "crossRepository", "contract", "gameModule", "mechanical"];
 
 export function validateModelPolicy(policy) {
   const errors = [];

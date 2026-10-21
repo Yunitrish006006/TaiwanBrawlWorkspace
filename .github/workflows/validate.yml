@@ -17,6 +17,24 @@ jobs:
         node-version: ["20", "22"]
     steps:
       - uses: actions/checkout@v4
+      - name: Checkout architecture frontend source
+        uses: actions/checkout@v4
+        with:
+          repository: Yunitrish006006/taiwan_brawl_front
+          ref: c8ebf62e141dbd25171e9cbe85e26e85b3ea2b3e
+          path: _validation/taiwan_brawl_front
+      - name: Checkout architecture backend source
+        uses: actions/checkout@v4
+        with:
+          repository: Yunitrish006006/taiwan_brawl_back
+          ref: 87210469faacc6162557ca2bae6ea224f22fced3
+          path: _validation/taiwan_brawl_back
+      - name: Expose sibling repository paths to boundary tests
+        run: |
+          ln -s "$GITHUB_WORKSPACE/_validation/taiwan_brawl_front" "$GITHUB_WORKSPACE/../taiwan_brawl_front"
+          ln -s "$GITHUB_WORKSPACE/_validation/taiwan_brawl_back" "$GITHUB_WORKSPACE/../taiwan_brawl_back"
+          ln -s "$GITHUB_WORKSPACE/_validation/taiwan_brawl_front/packages/shared/taiwan_brawl_core" "$GITHUB_WORKSPACE/../taiwan_brawl_core"
+          ln -s "$GITHUB_WORKSPACE/_validation/taiwan_brawl_front/packages/shared/taiwan_brawl_messaging" "$GITHUB_WORKSPACE/../taiwan_brawl_messaging"
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}

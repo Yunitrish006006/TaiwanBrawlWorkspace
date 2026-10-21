@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Yunitrish006006/taiwan_brawl_front
-          ref: c8ebf62e141dbd25171e9cbe85e26e85b3ea2b3e
+          ref: f46c4d0da933c4773533fc288fb36bbfc8ce4ed8
           path: _validation/taiwan_brawl_front
       - name: Checkout architecture backend source
         uses: actions/checkout@v4

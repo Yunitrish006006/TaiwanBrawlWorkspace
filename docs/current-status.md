@@ -500,8 +500,8 @@ Remote verification on 2026-10-21: coordination viewer workflow run
 Mini Royale package checks on Ubuntu/Windows/macOS; both in-repo shared Dart
 packages; Web IndexedDB storage; game-module consumer tests; Android API 35
 resource lifecycle; native resource lifecycle on Ubuntu/Windows/macOS; and
-Web/Android/Linux/macOS/Windows app builds. The only failing jobs were iOS app
-build and iOS Simulator setup: `firebase_core` requires iOS 15 while the
-checked-in Podfile/Xcode project target iOS 13. iOS 13/14 support is unchanged
-pending the user's compatibility decision. Production signing keys, catalog
+Web/Android/Linux/macOS/Windows app builds. Its iOS app build and simulator
+jobs failed against the then-configured iOS 13 target. The product decision on
+2026-10-21 sets the minimum iOS deployment target to 26.0; a new workflow run
+must validate iOS build and simulator setup. Production signing keys, catalog
 publication, D1/KV deployment, and release remain unconfigured and unperformed.

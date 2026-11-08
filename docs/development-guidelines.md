@@ -9,3 +9,4 @@
 7. A polling-to-WebSocket DM migration must update frontend ChatService, backend chat contract, tests, docs, and this workspace together.
 8. Use the local [model tiering policy](model-tiering.md) before allocating a model. Plans are advisory for existing sessions; the task runner applies the selected model to a new process.
 9. Keep validation scoped to changed behavior and actual consumers. Reuse completed checks until relevant inputs change; preserve evidence when handing off a failed task.
+10. Present product or architecture choices that need the user's decision in the reusable [plan choice UI](../apps/plan_selector/README.md). Show the question, viable options, tradeoffs, and any dependencies; keep already confirmed choices separate, and never preselect or apply an answer on the user's behalf.

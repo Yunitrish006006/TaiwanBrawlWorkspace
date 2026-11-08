@@ -12,6 +12,7 @@ out/
 .packages
 .taiwan-brawl-index/
 .codex/
+.local/
 apps/viewer_flutter/build/
 apps/viewer_flutter/.dart_tool/
 apps/viewer_flutter/assets/workspace-data.json

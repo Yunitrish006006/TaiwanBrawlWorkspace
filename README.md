@@ -77,8 +77,8 @@ Flutter build-time dependencies:
   taiwan_brawl_front
       +--> ../user_ui_settings
       +--> user_basic_system ^0.1.1
-      +--> ../taiwan_brawl_core
-      +--> ../taiwan_brawl_messaging
+      +--> packages/shared/taiwan_brawl_core
+      +--> packages/shared/taiwan_brawl_messaging
 
 Shared runtime boundaries:
   taiwan_brawl_messaging
@@ -139,3 +139,13 @@ flutter run -d chrome
 ```
 
 CI 也遵循相同流程：先驗證 `data/`，再生成 viewer input，最後 analyze/test/build Flutter。
+
+## Street Scrap local preview
+
+From this repository root:
+
+```bash
+npm run street-scrap-preview
+```
+
+This serves the Flutter app on `127.0.0.1:8789` and a temporary signed resource catalog on `127.0.0.1:8790`. The preview defaults to Flutter release mode so it works in ordinary browsers without the Dart debug extension; set `STREET_SCRAP_PREVIEW_BUILD_MODE=debug` when debugging. Signing keys are generated for that process and held in memory; this command does not read Keychain, contact Cloudflare, or publish a catalog. Use `STREET_SCRAP_PREVIEW_WEB_PORT` / `STREET_SCRAP_PREVIEW_RESOURCE_PORT` to choose another isolated port pair.

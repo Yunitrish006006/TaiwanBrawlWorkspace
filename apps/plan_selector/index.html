@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101411">
+    <title>計畫選擇｜Taiwan Brawl</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="計畫選擇首頁">
+        <span class="brand-mark" aria-hidden="true">TB</span>
+        <span><strong>計畫選擇</strong><small>TAIWAN BRAWL · LOCAL</small></span>
+      </a>
+      <div class="top-context"><span class="live-dot"></span><span>只在本機保存</span></div>
+      <button id="saveTop" class="button button-quiet" type="button">儲存選擇</button>
+    </header>
+
+    <main class="shell">
+      <section class="intro">
+        <div class="intro-copy">
+          <div class="eyebrow"><span class="eyebrow-line"></span>聊天功能 · 計畫決策</div>
+          <h1>先選方向，<em>再逐步做好聊天。</em></h1>
+          <p id="planSubtitle" class="intro-text"></p>
+        </div>
+        <div class="intro-mark" aria-hidden="true">
+          <svg viewBox="0 0 140 140" fill="none"><path d="M23 33.5C23 27.701 27.701 23 33.5 23h73c5.799 0 10.5 4.701 10.5 10.5v49c0 5.799-4.701 10.5-10.5 10.5H68l-22 19V93H33.5C27.701 93 23 88.299 23 82.5v-49Z" stroke="currentColor" stroke-width="3"/><path d="M42 49h56M42 63h39M42 77h47" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="101" cy="98" r="17" fill="#C9A879"/><path d="m94 98 5 5 10-11" stroke="#1A1D18" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </section>
+
+      <section class="confirmed-wrap">
+        <div class="confirmed-head"><span class="check-icon">✓</span><div><strong>已定方向與本輪範圍</strong><small>先前已選方向會沿用；範圍只代表這一輪先做什麼</small></div><button id="toggleConfirmed" class="text-button" aria-expanded="false" type="button">展開 <span>＋</span></button></div>
+        <div id="confirmedList" class="confirmed-list" hidden></div>
+      </section>
+
+      <div class="workarea">
+        <section class="decision-column" aria-label="尚待選擇的聊天計畫">
+          <div class="section-heading">
+            <div><div class="eyebrow">YOUR CALL</div><h2>需要你決定的項目</h2></div>
+            <div class="progress-wrap"><span id="progressLabel">0 / 0 已選</span><div class="progress-track"><div id="progressFill"></div></div></div>
+          </div>
+          <div id="decisionList" class="decision-list"></div>
+        </section>
+
+        <aside class="summary-card" aria-label="選擇摘要">
+          <div class="summary-top"><span class="summary-icon">✳</span><span class="summary-caption">CHOICE SUMMARY</span></div>
+          <h2>你的選擇</h2>
+          <p id="summaryHint" class="summary-hint">選一個選項，這裡會整理取捨。</p>
+          <div id="summaryList" class="summary-list"></div>
+          <div class="summary-footer">
+            <button id="saveButton" class="button button-primary" type="button"><span>儲存我的選擇</span><span aria-hidden="true">→</span></button>
+            <button id="copyButton" class="button button-secondary" type="button">複製選擇摘要</button>
+            <button id="downloadButton" class="text-button export-button" type="button">下載 JSON 備份</button>
+            <button id="resetButton" class="text-button reset-button" type="button">清除本機草稿</button>
+          </div>
+          <p id="saveStatus" class="save-status" aria-live="polite">選擇不會自動改動程式或正式計畫。</p>
+        </aside>
+      </div>
+
+      <footer class="footnote"><span>LOCAL DECISION BOARD</span><span>完成後可儲存或匯出，選擇會作為後續計畫依據。</span></footer>
+    </main>
+    <script type="module" src="/app.mjs"></script>
+  </body>
+</html>

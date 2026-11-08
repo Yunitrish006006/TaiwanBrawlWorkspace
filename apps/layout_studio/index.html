@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#111713">
+    <title>佈局工作台</title>
+    <style>[hidden]{display:none!important}</style>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">▦</span><div><strong>佈局工作台</strong><small>街角拾荒 · UI 草圖</small></div></div>
+      <div class="stage-switch" role="tablist" aria-label="設計階段">
+        <button class="stage-tab active" data-stage="sketch" role="tab" aria-selected="true">01　草圖</button>
+        <button class="stage-tab" data-stage="visual" role="tab" aria-selected="false">02　視覺細化</button>
+      </div>
+      <div class="top-actions">
+        <button id="saveButton" class="quiet-button">儲存草圖</button>
+        <button id="importButton" class="quiet-button">匯入版面</button>
+        <button id="exportButton" class="primary-button">匯出規格</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="left-panel panel">
+        <div class="panel-heading"><div><small>LAYOUT</small><h1>畫面結構</h1></div><button id="resetButton" class="icon-button" aria-label="重設草圖" title="重設草圖">↺</button></div>
+        <label class="field-label" for="screenSelect">預覽尺寸</label>
+        <select id="screenSelect">
+          <option value="phone">手機直向　390 × 844</option>
+          <option value="compact">小型手機　320 × 600</option>
+          <option value="tablet">平板　768 × 1024</option>
+          <option value="desktop">桌面　1280 × 800</option>
+        </select>
+        <div class="section-title"><span>畫面元件</span><small>點「＋」加入</small></div>
+        <div id="palette" class="palette"></div>
+        <div class="hint-card"><span class="hint-icon">↔</span><p>拖曳元件移動；拖右下角調整大小。選兩個元件可設定相對關係。</p></div>
+      </aside>
+
+      <section class="center-stage" aria-label="畫面佈局畫布">
+        <div class="canvas-toolbar"><div><strong id="canvasTitle">素材圖鑑</strong><span id="canvasDimensions">390 × 844</span></div><div class="canvas-tools"><label><input id="gridToggle" type="checkbox" checked> 格線</label><span id="saveState" aria-live="polite">草圖已自動保存</span></div></div>
+        <div id="layoutWarnings" class="layout-warnings" role="status" aria-live="polite" hidden></div>
+        <div class="canvas-scroll"><div id="boardScale"><div id="board" aria-label="可編輯佈局畫布"><svg id="relations" aria-hidden="true"></svg></div></div></div>
+        <div class="stage-caption"><span class="step-dot"></span><span id="stageDescription">先排好位置、大小與閱讀順序，再進入視覺細化。</span></div>
+      </section>
+
+      <aside class="right-panel panel">
+        <div class="panel-heading"><div><small>INSPECTOR</small><h2 id="inspectorTitle">畫面設定</h2></div></div>
+        <div id="emptyInspector" class="empty-inspector"><div class="empty-icon">⌖</div><strong>選取畫布元件</strong><p>調整尺寸、位置與元件關係。</p></div>
+        <div id="componentInspector" class="inspector-content" hidden>
+          <label class="field-label" for="componentName">元件名稱</label>
+          <input id="componentName" type="text" maxlength="32">
+          <div class="field-grid four">
+            <label>X<input id="posX" type="number" min="0" step="4"></label>
+            <label>Y<input id="posY" type="number" min="0" step="4"></label>
+            <label>寬<input id="sizeW" type="number" min="32" step="8"></label>
+            <label>高<input id="sizeH" type="number" min="24" step="8"></label>
+          </div>
+          <div class="section-title compact"><span>相對關係</span></div>
+          <label class="field-label" for="relationType">相對於</label>
+          <select id="relationTarget"><option value="">不設定</option></select>
+          <div class="field-grid relation-grid">
+            <select id="relationType" aria-label="關係類型"><option value="below">位於下方</option><option value="above">位於上方</option><option value="left">位於左側</option><option value="right">位於右側</option><option value="inside">包含於</option><option value="align">對齊中心</option></select>
+            <button id="clearRelation" class="quiet-button">清除</button>
+          </div>
+          <div id="visualControls" hidden>
+            <div class="section-title compact"><span>外觀</span></div>
+            <div class="field-grid colors">
+              <label>底色<input id="widgetColor" type="color"></label>
+              <label>文字<input id="textColor" type="color"></label>
+              <label>強調<input id="accentColor" type="color"></label>
+            </div>
+            <div class="field-grid">
+              <label>圓角<input id="radiusInput" type="range" min="0" max="28" step="2"></label>
+              <label>字級<input id="fontSizeInput" type="range" min="12" max="28" step="1"></label>
+            </div>
+          </div>
+          <button id="deleteButton" class="danger-button">刪除此元件</button>
+        </div>
+        <div id="themeInspector" hidden>
+          <div class="section-title compact"><span>整體風格</span></div>
+          <div class="theme-presets">
+            <button data-theme="pixel" class="theme-choice active"><i class="swatch pixel"></i><span>台灣寫實像素</span></button>
+            <button data-theme="paper" class="theme-choice"><i class="swatch paper"></i><span>舊紙與木色</span></button>
+            <button data-theme="night" class="theme-choice"><i class="swatch night"></i><span>深色工作台</span></button>
+          </div>
+          <div class="field-grid colors theme-colors">
+            <label>畫布<input id="backgroundColor" type="color"></label>
+            <label>面板<input id="surfaceColor" type="color"></label>
+            <label>強調<input id="themeAccent" type="color"></label>
+          </div>
+          <div class="hint-card"><span class="hint-icon">✦</span><p>第二階段只調整色彩與元件外觀，第一階段的佈局、尺寸和關係會保留。</p></div>
+        </div>
+      </aside>
+    </main>
+    <script type="module" src="/app.mjs"></script>
+  </body>
+</html>

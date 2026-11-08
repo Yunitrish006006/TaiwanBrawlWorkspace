@@ -4,9 +4,9 @@ import { selectModelTier } from "./model-tiering.mjs";
 export function buildOrchestrationPlan(task, options = {}) {
   const resolved = resolveTask(task);
   const tests = testPlanForTask(task);
-  const primary = resolved.repositories.includes("taiwan-brawl-back") ? "taiwan-brawl-back"
+  const primary = resolved.primaryRepository ?? (resolved.repositories.includes("taiwan-brawl-back") ? "taiwan-brawl-back"
     : resolved.repositories.includes("taiwan-brawl-front") ? "taiwan-brawl-front"
-    : resolved.repositories[0] ?? null;
+    : resolved.repositories[0] ?? null);
   return {
     task,
     primaryRepository: primary,

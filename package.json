@@ -6,11 +6,18 @@
   "scripts": {
     "validate": "node scripts/validate-workspace.mjs",
     "summary": "node scripts/taiwan-brawl-intelligence.mjs summary",
-    "test": "node --test tests/*.test.mjs",
+    "test": "node --test tests/*.test.mjs && node --test ../taiwan_brawl_front/packages/games/street_scrap/tool/test/*.test.mjs",
     "model-plan": "node scripts/taiwan-brawl-intelligence.mjs model-plan",
     "task": "node scripts/run-task.mjs",
     "task:auto": "node scripts/run-task.mjs --execute",
     "model-defaults": "node scripts/setup-model-defaults.mjs",
-    "render": "node scripts/render-flutter-data.mjs"
+    "render": "node scripts/render-flutter-data.mjs",
+    "street-scrap-content": "node ../taiwan_brawl_front/packages/games/street_scrap/tool/compile-street-scrap-content.mjs",
+    "street-scrap-design:audit": "node ../taiwan_brawl_front/packages/games/street_scrap/tool/audit-street-scrap-design.mjs",
+    "street-scrap-design:simulate": "node ../taiwan_brawl_front/packages/games/street_scrap/tool/simulate-street-scrap-design.mjs",
+    "street-scrap-design:test": "node --test ../taiwan_brawl_front/packages/games/street_scrap/tool/test/*.test.mjs",
+    "street-scrap-preview": "node scripts/serve-street-scrap-preview.mjs",
+    "layout-studio": "node apps/layout_studio/server.mjs",
+    "plan-selector": "node apps/plan_selector/server.mjs"
   }
 }

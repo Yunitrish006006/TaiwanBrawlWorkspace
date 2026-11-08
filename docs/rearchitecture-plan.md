@@ -1,6 +1,6 @@
 # Taiwan Brawl rearchitecture plan
 
-Status: messaging/App refactor slice implemented; approved game-module architecture remains in active migration. Archery and Mini Royale are separately versioned Flutter packages. Mini Royale now owns its manifest, models, rules, persistence contracts, lobby/deck UI, and complete interactive arena screen; the App supplies API, social, localization, resource, and host-navigation adapters. Optional resource lifecycle, signatures, offline catalog persistence, and multiplayer compatibility gates are implemented. Bundled game adapters now register once per module, and the host derives catalog, route, Home, Game Library, and resource-validator contributions from that registration list. The production catalog is still unpublished. iOS minimum support is 26.0; unsigned iOS App build plus Android API 35 and iOS Simulator resource lifecycle CI now pass. Production trust-key/catalog provisioning and release publication remain outstanding.
+Status: messaging/App refactor slice implemented; approved game-module architecture remains in active migration. Archery, Mini Royale, and Street Scrap are separately versioned Flutter packages. Street Scrap is registered as the third peer module and owns its gameplay, content, and save contracts; its package analyze/test checks are now part of the central game-module validation plan. Mini Royale now owns its manifest, models, rules, persistence contracts, lobby/deck UI, and complete interactive arena screen; the App supplies API, social, localization, resource, and host-navigation adapters. Optional resource lifecycle, signatures, offline catalog persistence, and multiplayer compatibility gates are implemented. Bundled game adapters now register once per module, and the host derives catalog, route, Home, Game Library, and resource-validator contributions from that registration list. The production catalog is still unpublished. iOS minimum support is 26.0; unsigned iOS App build plus Android API 35 and iOS Simulator resource lifecycle CI now pass. Public catalog trust-key configuration is staged in the feature-branch worktree. The operator reports importing the private key into login Keychain; a local non-exporting pair-verification command is available but has not yet been run. Cloudflare configuration/deployment, catalog publication, and release remain outstanding.
 
 Room invitations now persist an authoritative `game_id` (legacy rows migrate as
 `game.mini-royale`), and overview/action responses carry `gameId`. The Home
@@ -123,6 +123,17 @@ npm run game-catalog:sign -- --input catalog-payload.json \
 The key path is an operator-provided protected location; generated output and
 public trust-key build configuration still require reviewed release handling.
 
+For a private key stored as a login-Keychain generic-password item whose value
+is PKCS#8 PEM, the following command reads it only into process memory, signs
+a fresh random challenge, and compares it with the production public trust
+root in `wrangler.jsonc`. It never prints or writes the private key and does
+not create a catalog. This check is not complete until the operator runs it
+successfully.
+
+```sh
+npm run game-catalog:verify-keychain -- --service <service> --account <account>
+```
+
 `npm run game-resource:sign -- --file <payload> --private-key
 <protected-resource-key.pem> --module-id game.archery --resource-id
 game.archery.rules --version 1.0.0 --key-id resource-2026-01
@@ -137,18 +148,26 @@ metadata for release assembly; it does not upload bytes or publish a catalog.
 `npm run game-release:package -- --file <payload> --resource-metadata
 <signed-resource.json> --catalog-envelope <signed-catalog.json>
 --resource-public-key <resource-public.pem> --catalog-public-key
-<catalog-public.pem> --output game-resource-release.json` now joins those pieces into the existing Wrangler
-KV bulk format: binary payload entry (base64-marked), JSON response metadata,
-and the catalog envelope. It recomputes the payload hash/length, checks every
-key and URL against the API contract, and confirms the catalog points to the
-identical version/signature; it also cryptographically verifies both Ed25519
-signatures against the supplied public keys before writing a new local artifact
-(existing output is never overwritten). The end-to-end test feeds the resulting KV rows
+<catalog-public.pem> --output game-resource-release.json` packages a single
+resource. For a coordinated multi-resource release, pass
+`--resources-manifest <resources.json>` instead of `--file` and
+`--resource-metadata`; the manifest is a JSON array of `{ "file": "...",
+"metadata": "..." }` paths relative to the manifest. The batch path emits all
+immutable payload and response-metadata KV records plus exactly one signed
+catalog record, rejecting duplicate KV keys. Both paths use the existing
+Wrangler KV bulk format: binary payload entries are base64-marked and response
+metadata is JSON. The packager recomputes every payload hash/length, checks
+every key and URL against the API contract, and confirms the catalog points to
+the identical versions/signatures; it also cryptographically verifies both
+Ed25519 signatures against the supplied public keys before writing a new local
+artifact (existing output is never overwritten). The end-to-end test feeds the resulting KV rows
 through the Worker catalog and ranged-media handlers for both an Archery rules
 resource and a Mini Royale gameplay-rules resource, including module-specific
 immutable storage keys and catalog ownership. The Mini Royale release fixture
 also resolves through the room's trusted gameplay-rules loader with the exact
-content digest before admission. This is signed-fixture validation, not
+content digest before admission. A batch test confirms two resource payloads
+share one exact catalog record and exercises the manifest CLI. This is
+signed-fixture validation, not
 production publication. `npm run
 game-release:upload` is the separate explicit remote write and was not run;
 production trust keys and actual resource publication remain release gates.
@@ -200,7 +219,11 @@ Always-available application shell (Flutter host)
     ├── Royale gameplay data and presentation assets
     └── Archery gameplay data and presentation assets
 
-Each module uses shared platform ports and its own versioned resource adapter.
+Each module uses shared platform ports and its own versioned resource adapter;
+the game package owns its design inputs, compiled payloads, manifest and static
+resource metadata, while host registration injects routes, platform storage,
+and payload migration functions. Coordination tooling may invoke owner
+validators, but game-specific data stays with its package.
 Multiplayer admission checks protocol + rules/content compatibility.
 ```
 
@@ -348,19 +371,24 @@ Every module is catalogued by a manifest containing at least:
 | `moduleId`, `kind`, `publisher` | Stable identity and whether it is a feature or game |
 | `packageVersion` | Installed module release and update ordering |
 | `minimumShellVersion`, `hostApiRange` | Shell and shared-port compatibility |
-| `platforms`, `deliveryKind` | Supported target and platform-specific delivery adapter |
+| `platforms`, `deliveryKind` | Explicit non-empty supported targets and platform-specific delivery adapter; resource platforms narrow the module set |
 | `dependencies` | Required/optional module and resource dependencies; resource ranges apply to the installed version, which must be active and digest-verified |
-| `resources[]` | Resource ID/version, optional payload decoder schema version, size, digest, signature, and download location |
+| `resources[]` | Resource ID/version, required payload decoder schema version for downloadable resources, size, digest, signature, and download location |
 | `dataSchemaVersion` | Version of this module's persisted player data |
 | `multiplayer` | Game protocol compatibility and gameplay rules/content identity |
 
-`payloadSchemaVersion` is a resource-level format contract (for example, the
-JSON shape decoded by a game's rules/presentation reader). It is distinct from
-the resource's semantic version, the module's local-player `dataSchemaVersion`,
-and multiplayer protocol/ruleset versions. Older catalog entries may omit it
-during migration; new published resources should declare it. The backend
-validates positive integer values and the client persists the declared value
-with the install record for audit and future migration routing.
+`payloadSchemaVersion` is a required resource-level format contract for every
+downloadable resource (for example, the JSON shape decoded by a game's
+rules/presentation reader). It is distinct from the resource's semantic
+version, the module's local-player `dataSchemaVersion`, and multiplayer
+protocol/ruleset versions. Both Worker and client reject downloadable resource
+metadata that omits it; the package signing and release tools require the same
+positive integer, and the client checks it against the module's supported
+schema before installation.
+Signed catalog modules and every resource must also carry an explicit,
+non-empty `platforms` list. The client, Worker, catalog signer, and release
+packager reject missing declarations; a resource may narrow its module's
+platform set but cannot inherit an implicit all-platform default.
 Module and resource versions use strict SemVer 2.0 validation on both client
 and Worker. Compatibility comparisons ignore build metadata and apply SemVer
 prerelease precedence; dependency ranges remain bounded half-open ranges.
@@ -465,10 +493,15 @@ adapter. The package owns one canonical sorted aggregate-digest function used
 both by App contract composition and local rule loading, matching the Worker;
 missing or inconsistent aggregate digests and mismatched resources fail closed.
 These flows are covered by owner and consumer tests using signed fixtures.
-Production downloaded-rule
-multiplayer remains gated on publishing a signed catalog and configuring the
-Worker `GAME_CATALOG_TRUST_KEYS`; no production trust key or pack has been
-provisioned, and no release/deployment validation is claimed.
+The catalog public trust root is staged in the App and Worker source
+configuration; App parsing now has direct tests for the configured key and
+fail-closed malformed-key behavior. The operator reports importing the
+matching private key into login Keychain, and Keychain Access shows the expected
+service/account metadata. A local non-exporting Keychain challenge verifier is
+now available, but the key pair has not yet been independently verified.
+Production downloaded-rule multiplayer remains gated on deploying Worker
+`GAME_CATALOG_TRUST_KEYS` and publishing a signed catalog and resource pack;
+no release/deployment validation is claimed.
 
 The catalog is metadata, not a place to store game state. The local registry
 keeps module ID, bundled package version, selected/active state, resource-pack
@@ -543,23 +576,25 @@ maintained packages plus player-selectable content/assets. Optional delivery
 of executable code is not part of this design. Do not promise identical lazy
 loading or download-size behavior across platforms.
 
-Observed build evidence on 2026-10-20: the Web release build passed after the
-resource-update UI changes. An Android debug APK build was attempted and failed
-before compilation: the available JDK is 25.0.3, and Kotlin's bundled IntelliJ
-`JavaVersion.parse` throws `IllegalArgumentException: 25.0.3` under the
-project's Gradle 8.14 wrapper. Android SDK licenses are also not accepted.
-Android install/update/rollback therefore remains `NOT_EVALUATED`. iOS and
-macOS native builds remain `NOT_EVALUATED` because Xcode is incomplete;
-Windows/Linux target hosts are unavailable. Platform-filter unit tests are not
-substitutes for per-platform package installation/update/rollback proofs, so
-the initial cross-platform delivery acceptance remains open.
+Local build evidence on 2026-10-20: the Web release build passed after the
+resource-update UI changes. An Android debug APK attempt failed before
+compilation because the available JDK was 25.0.3 (unsupported by the project's
+Gradle 8.14 Kotlin tooling) and Android SDK licenses were not accepted. That
+local failure was superseded by hosted workflow run `39560967185`, recorded in
+the current test matrix: Web, Android APK, unsigned iOS (minimum iOS 26.0),
+Linux, Windows and macOS builds passed, as did Android API 35 and iOS Simulator
+resource install/update/rollback lifecycle tests. Platform unit or hosted
+emulator/simulator success does not prove signed store distribution, physical
+device behavior, or true offline install/restart; those acceptance gates remain
+open.
 
 The current modular Home registry and optional Mini Royale presentation pack
 changes were revalidated with `flutter build web --release`; the full App
 compiled successfully. Flutter reported that the secure-storage Web plugin is
 not compatible with a future Wasm build, while the standard release build
-completed. This does not change the unverified Android/iOS/desktop targets or
-the outstanding per-platform resource lifecycle gates above.
+completed. Together with the later hosted run described below, Web and native
+target builds are covered; physical-device behavior, signed distribution and
+true offline install/restart remain outside that CI evidence.
 
 Additional local checks on 2026-10-20 after the arena service, social,
 active-content-source, localization, and service-error port refactors: the
@@ -572,8 +607,10 @@ needed authorized access after the sandbox initially rejected its lock/stamp
 writes. The direct iOS build command stopped with
 `Application not configured for iOS` despite checked-in iOS project files;
 the macOS build could not resolve Xcode packages because `xcodebuild` is not
-available. These are environment/configuration failures, not passing platform
-builds. Android/iOS/macOS package builds remain open.
+available. These are environment/configuration failures on that local host at
+that time. Hosted platform build and simulator results were later recorded in
+run `39560967185` below; physical-device and signed-store acceptance remain
+open.
 
 Web browser storage now has direct Chrome coverage: the Web-only Hive test
 initializes IndexedDB, writes the selected-game state, resource catalog
@@ -625,11 +662,12 @@ payload remains active, then installs v2, closes/reopens Hive, verifies the
 persisted module/resource record and bytes, and removes v2 while keeping the
 game enabled. HTTP and signature verification are injected fixtures, while
 Hive uses the target platform's app storage. The workflow path filters include
-`integration_test/**`. Workflow YAML and its iOS shell script parse locally,
-but no GitHub Actions run has yet provided Android/iOS device execution
-evidence. The Android API 35 emulator job passed in run `39533157819`. The iOS
-Simulator job could not reach the test because CocoaPods rejected the current
-iOS 13 target against `firebase_core`'s iOS 15 minimum; it remains unverified.
+`integration_test/**`. Workflow YAML and its iOS shell script parse locally.
+At the time of the earlier run, the Android API 35 emulator job had passed in
+run `39533157819` and the iOS Simulator job was blocked by the then-current
+iOS 13 target against `firebase_core`'s iOS 15 minimum. Both platform resource
+lifecycle jobs were subsequently passed with the iOS 26 minimum in run
+`39560967185` above.
 
 Local owner/consumer verification on 2026-10-21 passed: the frontend app
 `flutter analyze`, the complete frontend `flutter test` suite (186 passed, 1
@@ -637,8 +675,8 @@ existing skipped), Archery and Mini Royale package analyze/tests, both in-repo
 shared Dart package analyze/tests, and `flutter build web --release`. The Web
 build emitted the existing Flutter Wasm compatibility advisory for
 `flutter_secure_storage_web`, but produced `build/web` successfully. These are
-local checks only; they do not establish GitHub Actions, Android/iOS native
-integration, or other desktop/mobile platform build results.
+local checks; hosted Android/iOS integration and platform build results are
+recorded separately above and do not establish physical-device behavior.
 
 The exact Chrome resource CI command was also run locally after downloader and
 race-test changes: IndexedDB persistence plus installer suite passed (23
@@ -675,6 +713,12 @@ executable game code. Flutter deferred imports may be used for lazy loading
 where supported, but are not the module-install contract.
 
 ### Per-game data ownership
+
+Updated target: the approved [database separation plan](database-separation-plan.md)
+uses main DB, SOCIAL_DB (including couples), and GAME_DB. The current shared
+database remains the source-state until migration is verified. The initial
+co-location description below records the earlier deployment option, not the
+new target; games share GAME_DB with isolated per-game namespaces.
 
 Each game declares a data namespace rooted at its stable `gameId`. Local keys,
 database tables, object-storage prefixes, API routes, migration history, and
@@ -753,6 +797,11 @@ resource version. The UI offers update/retry or exit. A P2P-hosted game must
 perform the same check between peers and must not allow the host to silently
 override the other peer's contract.
 
+Mini Royale's current frontend and backend contract declarations are checked
+for parity by the workspace boundary suite. Room owner tests separately verify
+that missing or mismatched contracts are rejected before membership persists,
+and that reconnect mismatches are rejected before WebSocket upgrade.
+
 The room snapshot and reconnect handshake retain the selected contract for the
 whole match; an update arriving mid-match applies only after leaving the room.
 Validation covers equal versions, explicitly compatible versions, incompatible
@@ -794,6 +843,12 @@ design/runtime gates for this new architecture scope, not claims that the
 current application already implements them.
 
 ## Messaging target
+
+Feature inventory, current implementation state, delivery stages, and the
+active one-to-one reliability scope are tracked in
+[`chat-feature-plan.md`](chat-feature-plan.md). Chat is the current workstream;
+later messaging enhancements remain sequenced there instead of being
+implemented in one batch.
 
 The first durable messaging model is event-based:
 
@@ -870,8 +925,8 @@ outbox, while the legacy store remains available as a migration adapter.
 The read path also replays legacy rows when the shared projection is partially
 populated, so migration does not lose older cached messages behind a fast path.
 
-Current slice: `ChatService` keeps the existing `DmService`/`ChatMessage` UI
-contract, but its receive path now uses `ServerMessageTransport` and
+Initial migration slice: `ChatService` kept the existing `DmService`/`ChatMessage` UI
+contract, while its receive path moved to `ServerMessageTransport` and
 `MessageSyncEngine`. Connected writes enter the shared outbox and use the event
 route first; a 404/405-only fallback preserves legacy `/send` and `/recall`
 compatibility. Network failures leave the event pending locally for a later
@@ -881,27 +936,173 @@ Legacy history reads are promoted into deterministic synthetic events so a
 successful compatibility read becomes durable event history. The remaining
 legacy `LocalChatRepository` is now injected at the ChatService boundary,
 keeping the compatibility adapter replaceable. The frontend now owns
-`EditableDmPage`, which preserves the external
-service/model contract while exposing event-based edit actions. This is
-deliberate compatibility state, not completion of the frontend migration.
-When the shared repository has durable projections, history now reads those
-projections first and maps them into the legacy UI model; the old Hive message
+`EditableDmPage` and the `DirectMessageService` port it consumes; the shared
+package's legacy `DmService` no longer defines the page's application boundary.
+The page consumes a frontend-owned `DirectMessage` view mapped directly from
+the shared `MessageProjection`, preserving stable message IDs, revision, read
+state, recall state, and pending delivery metadata. Edit, recall, and read
+commands use the stable event message ID. Legacy history and transport
+compatibility logic remain available through private migration adapters, but
+the UI does not depend on the legacy model. The old Hive history fallback remains until
+stored legacy rows have been migrated and verified. Each conversation stores
+a versioned durable manifest of promoted event message IDs, the exact legacy
+Hive row-key set, and a SHA-256 fingerprint for each raw row; normal reads skip
+the legacy box only while every event projection exists and both source keys
+and row contents match the manifest. A missing projection, changed source row,
+or malformed manifest triggers a recovery read and replay. Earlier list-only
+and key-only manifests are upgraded after their existing IDs and row sets are
+verified. The shared event repository treats reuse of an event ID for a
+different canonical payload as a durable conflict, and history migration does
+not mark that rejected source as complete. Source rows are retained rather
+than deleted. Each promotion read now carries an opaque fingerprint for that
+exact raw-row snapshot; writing the completion manifest compares the current
+source against that fingerprint and refuses to mark a newer or edited row as
+migrated. Such a race leaves the manifest absent so the next read can replay
+the retained rows safely. Cursor-bearing history loads bypass the local
+migration fast path and fetch the requested older server page; initial reads
+without a cursor retain the offline-first local path. Both paths merge through
+the same idempotent event batch. Legacy conversation history is preflighted as
+one event batch, so
+a deterministic row conflict is recorded without projecting valid sibling rows;
+the batch inbox supports idempotent restart recovery if event-store writes fail.
+An adapter-level regression now simulates failure while the second event is
+persisted, restores the repository from the durable inbox, and verifies the
+remaining event and migration manifest recover without duplicate projections.
+This is deliberate compatibility state, not completion of the frontend
+migration.
+
+The history endpoint returns chronological pages of at most 50 records,
+`hasMore`, and a compound `(createdAt, rowId)` continuation cursor. Queries use
+the timestamp and stable D1 row ID together, so many messages sharing one
+timestamp cannot be skipped at a page boundary. `EditableDmPage` requests the
+next page when the reader reaches the top, merges by stable message ID, and
+preserves the current viewport while older rows are inserted. Initial reads
+still render local history if the server is unavailable.
+Update (2026-10-28): the public `ChatMessage` stream, history, send, edit,
+recall, and read facade has now been removed from `ChatService`. The page and
+service tests use `DirectMessageService` operations and stable projection IDs;
+edit/read/recall commands now operate directly on those IDs without converting
+the projection into `ChatMessage` and guessing the ID back. Old-model conversion
+and compatibility operations now live in `LegacyChatHistoryAdapter`,
+`LegacyChatSyncSnapshotAdapter`, and `LegacyChatDeliveryAdapter`. Legacy sync
+snapshots are serialized directly from projections into the existing wire
+shape, and history orchestration now returns no legacy DTO to its DirectMessage
+caller. The legacy recall fallback derives only the old server key from the
+projection. The retry capability is a separate `RetryableDmService` port.
+`ChatMessage`, legacy storage, and legacy remote endpoints remain migration
+plumbing; removing that plumbing requires a separate compatibility audit and
+is not claimed by this slice.
+Update (2026-10-28): `EditableDmPage` no longer runtime-checks `ChatService` for
+manual P2P or retry behavior. It receives `ManualP2pDmService` and
+`RetryableDmService` as optional application capabilities. Both DM page
+widgets now accept the app-owned ports. `DirectMessageSession` and
+`DirectMessageSessionFactory` keep the `HomePage` independent from `ChatService`;
+the production and preview roots inject the factory, which creates a session
+per home route. Generic page tests can provide independent fakes, and manual
+peer-role selection is not imported from the transport factory into the page.
+One pure peer-role rule is shared by the page and factory without importing
+either implementation.
+Update (2026-10-28): the session lifecycle port now requires only
+`DirectMessageService` plus disposal. Retry and manual P2P are discovered as
+independent optional capabilities at the route boundary; implementations that
+do not support either feature can still be returned by the session factory.
+The current `ChatService` explicitly implements both capabilities.
+Update (2026-10-28): legacy whole-conversation snapshot upload/download is also
+an optional `DirectMessageSyncService` capability. The core DM page contract no
+longer forces local-only or P2P-only sessions to implement server snapshot
+operations; the route passes that capability only when the composed session
+supports it, and the page hides those actions otherwise. `ChatService` keeps
+the existing snapshot workflow through its explicit implementation. Ordinary
+conversation refresh remains part of the core service because it returns the
+current conversation projection.
+The event-to-legacy recall fallback derives the old server key directly from
+the event projection; `ChatService` no longer round-trips it through
+`MessageChatProjection`/`ChatMessage` just to obtain that key. The HTTP fallback
+remains isolated behind `LegacyChatDeliveryAdapter` until event-route
+deployment compatibility is verified. Legacy Hive persistence exposes
+history-migration, pending-message, delivery-write, and snapshot capabilities.
+Each compatibility adapter receives only the storage operations
+it uses; the composition root continues to provide the same `LocalChatRepository`
+implementation, so existing stored rows and migration recovery behavior are
+unchanged. Legacy remote history, delivery, and snapshot adapters likewise
+receive separate HTTP capability interfaces. `ServerLegacyChatRemoteSource`
+directly implements those focused ports and keeps the existing endpoint paths;
+there is no remote aggregate interface.
+When the shared repository has durable projections, history reads those
+projections first and maps them into the app-owned `DirectMessage` DTO; the old Hive message
 table remains a migration fallback for conversations not yet represented as
 events. The existing sync-upload/download snapshot format is also bridged into
 the shared event repository on download, so an imported recalled message keeps
 its event projection rather than existing only in the legacy cache. The FCM /
 pending-message notification poller now shares that repository as well: event
 envelopes are accepted as events, while legacy rows retain the Hive fallback.
-The P2P chat adapter now also derives UI messages from the shared projection;
-its legacy facade retains the old repository parameter for source compatibility,
-but no longer writes P2P event state into Hive.
-The frontend also exposes a transport-neutral `P2PMessageSession` seam with a
-deterministic in-memory transport test; WebRTC integration can use the same
-session contract without changing event commands or projections. `P2PChatService`
-now attaches its WebRTC DataChannel through that session, so the production
-and deterministic paths share the same sync lifecycle. Its startup now also
-connects signaling before creating the caller offer, with the signal listener
-installed first to avoid dropping an early negotiation message.
+The legacy pending-row decode, compatibility-store write, and acknowledgement-ID
+selection are isolated in the frontend-owned `LegacyPendingMessageAdapter`;
+`NotificationService` retains event ingestion and unread-conversation signaling.
+The production and preview composition roots build and inject this adapter so
+the notification application service no longer depends on the broad legacy
+chat-store port.
+Update (2026-10-28): the frontend now owns `LegacyChatRecord` for rows that
+remain in the legacy Hive cache. `LegacyChatStore` and its focused history,
+pending-message, and delivery ports no longer expose the shared `ChatMessage`
+type; the Hive repository and legacy snapshot/event conversion use the owned
+record. The record retains the existing `createdAt_senderId` key and exact
+camel-case JSON fields, and reads old rows as well as snake-case server rows.
+The pending-row parser retains the prior acknowledgement-ID and flag defaults.
+The HTTP history source parses the existing endpoint payload directly into the
+same record, then promotes it into shared events. Endpoint paths, query
+parameters, aliases, and acknowledgement behavior remain intact. This removes
+the shared UI model from the legacy history/storage migration path without
+claiming that the legacy wire format or cached data has been retired.
+Update (2026-10-28): the former `MessageChatProjection` adapter had no
+production consumers after `EditableDmPage` moved to `DirectMessage`; it has
+been removed along with the frontend's thin `ChatMessage` export shim. Shared
+event projections now map directly to `DirectMessage` in the app-facing model.
+Update (2026-10-28): the legacy Hive repository no longer exposes unused
+single-message lookup, delivery marking, text editing, message deletion,
+conversation clearing, or box-closing operations. Its remaining methods are
+limited to history migration, legacy pending/delivery writes, and snapshot
+import/export. Hive box names, stored row shape, migration manifests, and
+recovery reads are unchanged; the legacy cache remains until stored data has
+been migrated and verified.
+Update (2026-10-28): `ChatServiceFactory` now accepts separate local history,
+delivery-write, and snapshot-store ports and injects each into only the
+adapter that needs it. Production and local-preview composition roots still
+share one `LocalChatRepository` instance, while factory code and its regression
+test no longer depend on the aggregate `LegacyChatStore` interface.
+The factory now applies the same boundary to remote history, delivery, and
+snapshot operations; production and preview roots share one
+`ServerLegacyChatRemoteSource` instance, but the factory no longer depends on
+the aggregate `LegacyChatRemoteSource` interface either.
+Update (2026-10-28): removed the now-unused `LegacyChatStore` aggregate. The
+Hive repository directly implements the four local capabilities, and test
+doubles implement only the ports required by each service or adapter. No
+stored-data format or migration behavior changed.
+Update (2026-10-28): removed the unused `LegacyChatRemoteSource` aggregate.
+The HTTP compatibility adapter directly implements focused history, delivery,
+and snapshot ports; the preview runtime no longer retains an otherwise unused
+aggregate reference. Existing endpoint paths and payloads remain unchanged.
+Update (2026-10-28): deterministic conversion from stored legacy chat rows and
+legacy snapshots into shared events now lives in the pure
+`LegacyChatEventMapper`. History promotion and snapshot merge use that mapper;
+`MessageChatSyncAdapter` remains responsible for writing the old snapshot
+shape from current projections. This keeps Hive access, HTTP synchronization,
+and legacy event conversion in separate layers while preserving the existing
+event IDs, revisions, recall events, and row formats.
+Update (2026-10-28): versioned migration-manifest validation, legacy list/v1
+upgrades, row-key checks, and SHA-256 fingerprint checks now live in the pure
+`LegacyChatMigrationManifest` codec. `LocalChatRepository` supplies the current
+raw Hive rows and persists only valid upgrades or invalidation; it no longer
+owns manifest schema parsing or digest logic. Existing manifest versions and
+Hive row data remain supported, and this change does not delete cached rows.
+The transport factory capability was renamed `DirectMessageTransportFactory`
+to describe the event-backed DM flow instead of the retired chat row model.
+The P2P chat adapter derives UI messages from the shared projection. The
+production `ChatService` owns manual P2P preparation and connects the WebRTC
+transport to the same shared sync engine used by the server relay. The unused
+`P2PChatService` / `P2PMessageSession` compatibility path has been removed;
+transport negotiation stays in `P2PMessageTransport` and its injected
+signaling/peer-connection factories.
 `EventAuthenticator` is an injectable boundary on local commands and P2P sync;
 peer key distribution remains a separate unresolved protocol, so the local
 HMAC device identity is not reported as remote-peer verification.
@@ -974,15 +1175,15 @@ failure description instead of silently looking equivalent to durable storage.
 The frontend no longer exposes a second `HiveCredentialStore` implementation:
 credential persistence belongs to the platform secure-storage adapter, while
 Hive remains responsible for encrypted message-event and outbox persistence.
-The old `FlutterSecureCredentialStore` type name is retained only as a
-deprecated source-compatible alias during migration.
-The legacy conversation cache is now behind a `LegacyChatStore` port used by
-`ChatService` and notification handling; `LocalChatRepository` remains the
-default Hive compatibility adapter rather than an application-layer type
-dependency.
-The remaining server history, sync snapshot, legacy send, and legacy recall
-requests are likewise behind `LegacyChatRemoteSource`; `ChatService` keeps the
-old `DmService` surface but no longer owns those HTTP endpoint details.
+The unused deprecated `FlutterSecureCredentialStore` alias has been removed;
+current frontend consumers use `PlatformCredentialStore` directly.
+The legacy conversation cache is exposed through separate history,
+pending-message, delivery-write, and snapshot ports consumed only by the
+adapters that need them; `LocalChatRepository` implements those capabilities
+without an aggregate interface. Server history, snapshot sync, legacy send,
+and legacy recall likewise use separate remote ports implemented by
+`ServerLegacyChatRemoteSource`. `ChatService` keeps its app-owned
+`DirectMessageService` surface and delegates HTTP details to its adapters.
 The notification installation-id migration is likewise behind a
 `LegacyInstallationStore` port. `NotificationService` no longer opens Hive
 directly; `HiveLegacyInstallationStore` is a read-only compatibility adapter,
@@ -1013,10 +1214,20 @@ from directly depending on Firebase Messaging globals.
 
 The provider-neutral push contract now lives in the shared
 `taiwan_brawl_messaging` package, including configuration, token, permission,
-and message types. Firebase-specific types remain only in the frontend adapter.
+and message types. Initialization configuration is opaque; Firebase options
+and the Web VAPID key stay in the frontend Firebase adapter and cannot leak
+into another provider's implementation. Firebase-specific types remain only
+in the frontend adapter. The package version is `0.2.0` because its public
+provider contract changed incompatibly from the initial `0.1.x` API.
+`NotificationService` now requires a `NotificationPushProvider` and delegates
+remote configuration parsing, platform eligibility, token cleanup capability,
+and registration provider ID to that adapter. Production explicitly injects
+`FirebasePushProvider`; the local preview explicitly injects an inert preview
+provider. The service no longer imports Firebase or chooses an FCM default.
 
-Platform-neutral deployment configuration now lives in the sibling
-`taiwan_brawl_core` package. The frontend retains a compatibility export from
+Platform-neutral deployment configuration now lives in
+`taiwan_brawl_front/packages/shared/taiwan_brawl_core`, versioned and owned by
+the frontend repository so CI can resolve it without another checkout. The frontend retains a compatibility export from
 `lib/config`, while composition roots provide API URL, OAuth client IDs, and
 feature flags. Session credentials, provider API keys, and device secrets stay
 behind the existing credential/key ports or server environment injection.
@@ -1034,20 +1245,53 @@ serialization or risk carrying message bodies. Its import boundary can also
 require the expected session and sender device, preventing stale or
 cross-session bundles from entering a live negotiation.
 
-`MessagingTransportFactory` and the legacy `P2PChatService` now accept a
-`P2PSignalingFactory`, so the manual adapter can be selected at the composition
-boundary instead of only being usable in isolated tests. Hosted signaling stays
-the default compatibility path.
+The shared package defines `NegotiatingMessageTransport` as an optional
+capability on top of `MessageTransport`. `ChatService` consumes this contract
+through an injected factory; the frontend WebRTC adapter implements it, and the
+composition-owned `MessagingTransportFactory` supplies ICE configuration.
+ChatService fails closed when manual signaling is configured without a
+transport adapter, and the application service has no direct WebRTC fallback.
 
-`P2PChatService` now exposes manual negotiation bundle export/import at its
-facade boundary. Product UI or another local entrypoint can exchange validated
-offer/answer/ICE bundles without importing WebSocket or signaling adapter
-internals; hosted signaling rejects this out-of-band-only API.
-The migrated DM page now exposes the same manual bundle flow through
-`ChatService`: caller/answerer preparation, copy/paste import/export, bundle
-refresh for late ICE candidates, and completion all reuse the shared message
-repository and sync engine. This is a usable negotiation entrypoint, but still
-not evidence of successful two-device WebRTC/NAT traversal.
+`MessagingTransportFactory` accepts a `P2PSignalingFactory`, so manual or hosted
+signaling is selected at the composition boundary. The DM page consumes the
+`ManualP2pDmService` capability for caller/answerer preparation, signed
+copy/paste bundle import/export, and completion. `ChatService` currently
+implements the capability alongside the DM session contract, reusing the
+shared message repository and sync engine. Browser runtime success does not
+prove physical-device or Internet-NAT connectivity.
+
+Manual negotiation bundles are now signed by the local device identity at both
+product service facades. Envelope v2 wraps the existing validated negotiation
+bundle and signs its exact serialized bytes, binding the session, sender device,
+SDP, and ICE candidates. Import verifies the signature through the configured
+trusted-device authenticator before passing any signal to WebRTC. The shared
+low-level v1 serializer remains available for format validation and migration
+tests; product entrypoints reject unsigned bundles. Failed signing leaves the
+outgoing signaling queue intact for retry. This authenticates negotiation data
+against the explicitly trusted key, but does not encrypt the SDP/ICE envelope
+or establish successful physical-device/NAT connectivity.
+
+The Chrome runtime gate also uses two real browser peer connections with
+`ManualPeerSignaling`: the devices exchange v2 signed bundles, verify each
+other through fingerprint-confirmed Ed25519 trust, establish the DataChannel,
+and deliver a signed message event. This exposed and fixed a lifecycle defect
+where `connect()` repeated peer-connection preparation after the manual
+`prepare()` phase; preparation is now idempotent until disconnect. This is
+local browser evidence for the serverless bundle path, not physical-device,
+Internet-NAT, or hosted-signaling validation. Manual signaling also coalesces
+identical queued offer/ICE payloads, so retry timers cannot inflate a pending
+copy/paste bundle with duplicate negotiation records.
+
+The composition root now supplies a manual-signaling factory rather than a
+singleton channel. `HomePage` creates one `ChatService` per opened DM route, and
+the route wrapper disposes that session when closed. Each conversation-scoped
+service receives its own signal stream and outgoing queue, preventing concurrent
+DM sessions from mixing offers, answers, or ICE candidates in signed bundles.
+Lifecycle operations on that session are serialized as well: a disconnect or
+route disposal waits for in-flight negotiation preparation, repeated disposal
+shares the same completion future, and disposed sessions reject new connection
+or P2P preparation work. This avoids closing a peer transport while it is still
+creating the local offer or ICE candidates.
 
 Manual P2P startup is now explicitly two-phase at the facade: a product entry
 point can prepare the peer connection without blocking on the DataChannel,
@@ -1070,6 +1314,15 @@ Restore treats the durable outbox as a crash-recovery source: if a local write
 left an outbox row without its main event row, the event is reinserted and
 remains pending for delivery instead of being discarded.
 
+When restore finds the same event ID in both stores, the durable event row is
+authoritative. A different canonical payload is recorded as a conflict, and
+the pending copy is upserted from the authoritative row before it can be sent.
+If conflict recording or repair fails, restore fails closed so the altered copy
+is not exposed for delivery; a later restore can retry the durable repair.
+Storage adapters implement `append` as an event-ID upsert, including the
+pending row when `pendingOutbox` is true. Restore also deduplicates pending
+rows by event ID so repeated durable rows produce only one delivery attempt.
+
 The shared platform ports now include an opaque durable sync cursor. The
 encrypted Hive message store persists a cursor per DM transport scope, and the
 server relay uses a friend-scoped `afterId` query so a restarted poller does
@@ -1079,49 +1332,84 @@ The production composition root injects the restored encrypted store into the
 transport factory, so this cursor is active in the shipped server adapter
 rather than existing only in tests.
 
-`ChatService` now accepts an optional `ChatMessageTransportFactory`; the default
-still uses the server adapter, while tests and future P2P/application adapters
-can replace transport creation without changing the legacy chat API.
+`ChatService` requires an injected `ChatMessageTransportFactory`; the
+composition root chooses the server adapter, while tests and future
+P2P/application adapters can replace transport creation without changing the
+legacy chat API. The service itself no longer constructs a transport.
 Its reconnect lifecycle now serializes transport teardown and replacement;
 `disconnectAsync`/`disposeAsync` expose an awaitable boundary while the legacy
 synchronous facade remains available for existing consumers.
 Disposal also releases the injected signaling channel, so repeated DM page
 lifecycles do not retain manual or hosted signaling stream resources.
 Notification configuration and device registration now use a replaceable
-`NotificationRemoteSource`; `NotificationService` retains the legacy
-`ApiClient` constructor boundary while the server endpoint adapter owns the
-notification HTTP paths and payload transport.
+`NotificationRemoteSource`; the server endpoint adapter owns the notification
+HTTP paths and payload transport. `NotificationService` receives required
+storage, notification, pending-polling, credential, installation, push, and
+messaging-core dependencies and no longer accepts `ApiClient` or constructs
+those adapters itself. The pending source adapter maps its source-specific row
+into a shared message event; notification application logic consumes that
+event through `MessagingCoreService` without importing the server message
+transport or accepting a repository fallback.
 The production HomePage now supplies the restored app-level device identity to
 `ChatService`, so locally created/edit/recall events are signed through
-`DeviceEventAuthenticator` when secure identity storage is available. Remote
-peer verification is still opt-in and remains fail-closed without a trusted
-identity directory. `ChatService` separates the local event signer from the
-optional remote verifier. Production currently signs local events but leaves
-remote verification unset until a trusted peer directory is available; an
-injected remote verifier still applies the fail-closed gate to live and
-download-merge ingestion. The frontend now also exposes `PeerTrustService` as
-the application boundary for explicitly importing or revoking out-of-band
-peer material. Its current decoder is a migration bridge for the existing
-local HMAC identity. The invitation requires an explicit fingerprint
-confirmation and is not automatic key exchange or a public-key protocol; it is
-not enabled by default in the composition root. `PEER_VERIFICATION_ENABLED=true`
-now enables that injected remote verifier for both ChatService and pending
-notifications; the default remains compatibility-preserving and disabled. The
-DM serverless pairing dialog exposes invitation copy/paste and the confirmation
-step, so the trust protocol is reachable from the product flow.
+`DeviceEventAuthenticator` when secure identity storage is available. New
+device identities use Ed25519; the 32-byte private seed stays in the injected
+credential store, and signed event strings are tagged `ed25519:`. The v2
+serverless trust invitation contains only the public key and a SHA-256
+fingerprint, which the users must compare through an independent channel.
+Version-1 invitations remain readable for migration; they contain a shared
+HMAC secret and the UI labels them as legacy material that must only be moved
+through a private channel. The identity verifier accepts trusted legacy HMAC
+signatures while all new local signatures use Ed25519. Remote peer verification
+is still opt-in and fails closed without a trusted identity directory.
+`ChatService` separates the local event signer from the optional remote
+verifier; `PEER_VERIFICATION_ENABLED=true` enables that verifier for both
+ChatService and pending notifications, while the default remains disabled. The
+DM pairing dialog exposes invitation copy/paste and fingerprint review, then
+requires the user to enter the exact fingerprint obtained through a separate
+channel before trust can be saved. The invitation's own fingerprint cannot
+self-confirm trust. This is an out-of-band public-key trust ceremony, not
+automatic key exchange or proof against a user entering an unverified
+fingerprint from the invitation itself.
+
+Manual P2P ingestion always uses the credential-backed peer trust directory,
+regardless of the opt-in verification flag retained for legacy server-relay
+migration. P2P startup fails before allocating a transport when the local
+device identity and peer verifier are absent. A Chrome two-peer WebRTC runtime
+test now exercises mutually fingerprint-confirmed Ed25519 identities through
+both production MessageSyncEngine instances and signed command repositories
+for create, read, edit, and recall. It then confirms that an invalid signature
+creates a conflict and is rejected without changing the recalled projection.
+This verifies browser loopback cryptographic ingestion; device credentials,
+independently compared fingerprints, hosted signaling, Internet NAT, and
+physical-device behavior still require separate runtime validation.
 The WebRTC lifecycle is now extracted into `P2PMessageTransport`, and the
-production chat factory can opt into it with `P2P_CHAT_ENABLED=true`. A
+production composition defaults to it through `P2P_CHAT_ENABLED=true`; an
+explicit `P2P_CHAT_ENABLED=false` keeps server-relay-only behavior. A
 `FallbackMessageTransport` attempts the P2P path first and uses the server
-relay when connection setup times out or fails. A Chrome runtime test now
-opens two real browser peer connections with local ICE configuration and
-transfers a message event through the DataChannel. This validates the browser
-loopback lifecycle; physical-device connectivity, Internet NAT traversal, and
-hosted signaling still require a separate runtime gate. Deterministic fallback
+relay when connection setup times out or fails. A Chrome runtime test opens
+two real browser peer connections with local ICE configuration and sends a
+created event, a receiver read, the author's subsequent edit, and recall over
+the DataChannel through MessageSyncEngine. The receiver applies every signed
+event to the shared repository and ends with the visible projection
+`訊息已收回`, read state retained, and revision 3. A forged signature is
+recorded as a conflict and does not mutate that projection. This validates
+ordered browser-loopback delivery and projection; it does
+not validate physical-device connectivity, Internet NAT traversal, hosted
+signaling, or remote peer-key distribution. The browser test, P2P session tests,
+and facade tests now run in the dedicated `p2p-webrtc-runtime` GitHub Actions
+job, and edits to those test files trigger the workflow. The workflow has been
+updated locally; its remote result is pending a push and actual run.
+Deterministic fallback
 behavior, including recovery after a post-connect send failure, is covered by
 frontend tests.
-The opt-in Web build also compiles successfully with
-`--dart-define=P2P_CHAT_ENABLED=true`; this is compile-time wiring evidence,
-not proof of a live two-device connection.
+The Web build was also compiled with
+`--dart-define=P2P_CHAT_ENABLED=true`; current builds use the same setting by
+default unless explicitly overridden. This is compile-time wiring evidence,
+not proof of a live two-device connection. The DM page separately retains its
+manual signed-bundle flow, which does not use hosted signaling; the server
+relay remains a fallback for hosted P2P failure and an explicit transport
+option.
 The same production entrypoint also compiles with
 `--dart-define=PEER_VERIFICATION_ENABLED=true`; this verifies configuration
 wiring only, not a completed peer-material import or two-device verification
@@ -1129,14 +1417,13 @@ session.
 Transport selection is now owned by the application-level
 `MessagingTransportFactory`; `HomePage` no longer constructs WebRTC, signaling,
 or server transport adapters directly. Production chat always supplies this
-factory, including when the selected transport is the default server relay;
-the `ChatService` constructor fallback remains only for legacy/test consumers.
+factory, including when the selected transport is the default server relay.
+`ChatService` now requires its messaging core, legacy store, remote source, and
+transport factory. It no longer accepts `ApiClient` or constructs Hive, HTTP,
+or server-relay adapters; `ChatServiceFactory` only assembles supplied ports.
 The same factory now supplies the manual serverless P2P transport builder, so
 the pairing path does not create a WebRTC adapter inside the application
 service.
-The legacy `P2PChatService` facade accepts that builder as an optional
-compatibility injection as well; its old default remains available for callers
-that have not moved to the composition root yet.
 The composition root now also owns the shared `AdminService`, `LlmBotService`,
 and `RoyaleService` instances. Admin, settings, home, and deck pages consume
 those application services through providers instead of constructing them in
@@ -1152,11 +1439,21 @@ polling lifecycle independent from the remote transport.
 assembly as well. HomePage receives the factory through the composition root;
 API, messaging core, identity, verifier, transport selection, and manual
 signaling are no longer assembled in the page lifecycle.
+The factory requires the legacy chat store, legacy remote source, and message
+transport factory. `ChatService` also requires its messaging core and all four
+ports; its direct-construction compatibility defaults have been removed.
+Focused tests now supply in-memory stores, fake remote sources, or explicit
+server adapters at the test boundary.
 The same composition root explicitly creates one legacy chat store, legacy
 remote source, and installation-store adapter for production. ChatService and
 NotificationService receive those adapters rather than independently falling
-back to Hive constructors, while their defaults remain for source-compatible
-tests and alternate consumers.
+back to Hive constructors. NotificationService now requires its complete
+adapter set, so every caller must make its storage and HTTP choices explicit.
+It also requires the shared messaging core and an explicit nullable
+remote-event authenticator. Pending-row event parsing is dispatched through
+the `PendingNotificationSource` contract and implemented by its server
+adapter; the application service no longer chooses between a
+`MessagingCoreService` and a directly supplied `MessageRepository`.
 P2P caller/answerer selection is deterministic by peer user-id ordering, so a
 DM pair cannot accidentally start two competing offerers.
 The caller now retains its local offer and emitted ICE candidates and retries
@@ -1164,6 +1461,21 @@ them during the transient signaling window until the DataChannel connects or
 the existing timeout triggers relay fallback. This reduces message-ordering
 loss when the peer's SignalRoom connection starts later, but is still not
 evidence of a real two-device WebRTC runtime.
+`SignalRoom` now uses the Durable Object WebSocket Hibernation API end to end:
+the user ID is stored as a socket attachment, and message/close/error dispatch
+uses Durable Object handlers. Relay and same-user replacement discover sockets
+through `getWebSockets()` instead of an instance-only map, so a reconstructed
+object can recover the active peers. A fake-state reconstruction regression
+validates this code path; actual Cloudflare hibernation and two-device NAT
+acceptance remain open. A local workerd owner test now accepts two real
+hibernatable WebSocket clients, evicts the Durable Object with
+`evictDurableObject()`, and verifies that the surviving sockets relay an SDP
+offer after the runtime reconstructs the object. The signaling boundary
+accepts only bounded offer/answer SDP and ICE negotiation fields, rejects
+message-shaped or oversized payloads, and relays a normalized allowlist; the
+frontend wire-shape regression guards compatibility with the existing SDP/ICE
+client contract. Local workerd eviction is stronger than a hand-built state
+fixture but does not prove hosted Worker behavior or real-device NAT traversal.
 `MessagingCoreService` now also owns construction of shared command services
 and sync engines. Production `ChatService` uses those application methods,
 while the repository remains available for projection/history compatibility.
@@ -1175,13 +1487,17 @@ remain only for envelopes and rows that cannot be projected as shared events.
 Its background pending polling and acknowledgement now live behind an injected
 `PendingNotificationSource`; the production server implementation owns HTTP and
 row-level ack while tests or a future local source can replace it.
+The consumer acknowledges an event-envelope row only after the shared store is
+durable. A rejected event is acknowledged only when durable conflict storage
+recorded the rejection; in-memory/degraded ingestion leaves the server row
+pending so a restart cannot silently lose the event or its conflict.
 The production composition root now explicitly creates and injects both the
 pending source and notification registration source, so the notification
 application service does not select HTTP adapters implicitly.
 The same rule now applies to the production auth, friends, admin, LLM, and
 Royale services: each receives an explicitly composed server remote source,
-while source-compatible constructors remain only for tests and alternate
-composition roots.
+and each service constructor requires that source. `ApiClient` and server
+adapter construction stay in the composition roots or explicit test setup.
 The optional battle-animation cache follows the same rule: its production Hive
 store and HTTP asset source are composed explicitly in the App; the game cache
 service has no platform-specific compatibility defaults.
@@ -1233,14 +1549,66 @@ through acknowledged rows, so a later event cannot skip an earlier local
 storage failure.
 The backend now adds a receiver/sender/id index for the friend-scoped cursor
 query, while retaining the legacy created-at index for compatibility reads.
-Authentication and profile/session mutations now use a replaceable
-`AuthRemoteSource`; `AuthService` keeps its existing `ApiClient` constructor
-compatibility while the server adapter owns HTTP paths and session cleanup.
+Legacy DM history loading and refresh promotion now live in the frontend-owned
+`LegacyChatHistoryAdapter`. It owns the legacy local/remote read, event
+conversion, projection-completeness check, and durable migration-manifest write.
+`ChatService` delegates history operations to this adapter while retaining its
+separate authenticator for live sync transport. Legacy rows and the remote
+compatibility source remain available for recovery and staged migration.
+Whole-history sync snapshots now have a separate
+`LegacyChatSyncSnapshotAdapter`: it preserves the legacy wire shape, exports
+shared projections with pending state, and merges downloaded snapshots into
+both the compatibility store and the shared event repository. `ChatService`
+delegates upload/download orchestration to it; the legacy remote source and
+store remain injected ports for the other staged compatibility operations.
+Snapshot merge now preflights the complete shared-event batch against current
+history before applying any member. A deterministic conflict is persisted and
+fails the merge without applying valid peers from that batch; raw compatibility
+rows are imported only after the batch passes. Single-event ingestion remains
+immediate when uncontended; local and remote event mutations queue behind an
+active batch preflight/commit. Stores implementing `MessageBatchInboxStore`
+stage the complete batch in one durable inbox record and replay it idempotently
+after restore. Every event is persisted before new in-memory projections are
+committed or emitted, so a failed append leaves the current repository
+unchanged. This provides atomic projection visibility and write-ahead recovery,
+not a cross-event database transaction; durable event rows can still contain a
+prefix until inbox replay completes.
+The remaining legacy send and recall HTTP calls plus legacy-row write now live
+in `LegacyChatDeliveryAdapter`. `ChatService` retains only the compatibility
+decision: use the shared durable outbox first and invoke the legacy endpoint
+only when a connected deployment reports that the event route is unsupported.
+Offline events remain queued for reconnect.
+The legacy recall key conversion from a shared projection's timestamp and
+author ID is also owned by `LegacyChatDeliveryAdapter`; `ChatService` no longer
+encodes the legacy `createdAt_senderId` wire key.
+`ChatServiceFactory` is the composition boundary for these adapters: it builds
+them from focused storage and remote capability ports, and `ChatService`
+receives only the focused adapter contracts. Neither service depends on an
+aggregate legacy store or remote-source interface.
+Outbox retry scheduling is owned by shared `MessageSyncEngine` rather than the
+frontend `ChatService`. A host may supply a retry interval; the engine retries
+only events accepted by its conversation filter, prevents overlapping retry
+flushes, cancels its timer when stopped, and waits for an in-flight retry flush
+before disconnecting the transport.
+The same event scope now gates inbound ingestion. Out-of-scope events become
+conflicts rather than projections; receipt transports acknowledge only after
+an event or its rejection conflict has been durably written. If local conflict
+storage fails, the diagnostic is removed from memory so a relay retry attempts
+the durable write again.
+Outbox acknowledgement now persists its removal before pruning the in-memory
+queue. If transport delivery succeeds but local acknowledgement storage fails,
+the same event ID remains retryable; receivers rely on event-ID idempotency to
+absorb the possible repeated delivery.
+The reusable sync-engine API addition increments `taiwan_brawl_messaging` to
+`0.3.0`, with the frontend lockfile and workspace package snapshot aligned.
+Authentication and profile/session mutations use a replaceable
+`AuthRemoteSource`; `AuthService` requires that port while the server adapter
+owns HTTP paths and session cleanup.
 Friend search, friendship mutations, block state, and room invites now use a
 replaceable `FriendsRemoteSource`; the overview polling service can receive the
 same boundary without changing its lifecycle or deduplication behavior.
 Admin user-role, card, character, and image management now uses a replaceable
-`AdminRemoteSource`; `AdminService` retains its existing constructor and model
+`AdminRemoteSource`; `AdminService` requires that port and retains its model
 parsing surface while the server adapter owns HTTP endpoint paths. This keeps
 admin screens compatible with a future local/offline management source without
 coupling widgets to transport details.
@@ -1264,7 +1632,7 @@ adapter. The settings panel's direct LLM connectivity check similarly moved to
 Royale room, deck, progression, card, hero, and bot HTTP calls now use a
 replaceable `RoyaleRemoteSource`; the server adapter owns endpoint paths and
 WebSocket URL/header construction while `RoyaleService` retains model parsing
-and the existing constructor compatibility surface.
+and requires the remote-source port at construction.
 The shared `MessageRepository` now rejects remotely received events that are
 already provably invalid, records their conflict reason, and removes them from
 the active event set. Valid out-of-order revisions remain staged while a

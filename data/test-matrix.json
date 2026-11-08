@@ -2,6 +2,12 @@
   "schemaVersion": 1,
   "categories": [
     {
+      "id": "couple-days-local-http",
+      "requiredFor": ["couple-days-integration-change"],
+      "commands": ["node scripts/verify-couple-days-local.mjs"],
+      "notes": "Run from coordination with Flutter in PATH or FLUTTER_BIN set. Uses fresh temporary local D1 and synthetic sessions; verifies Flutter service/Hive and a Dart widget-bridge test double. Does not verify Google OAuth, native widget rendering, signing or deployment. Normal flutter test skips this case until the isolated server is explicitly provided."
+    },
+    {
       "id": "workspace",
       "requiredFor": [
         "data-change",
@@ -50,6 +56,18 @@
       ]
     },
     {
+      "id": "street-scrap-package",
+      "repository": "taiwan-brawl-front",
+      "requiredFor": [
+        "game-module-change"
+      ],
+      "commands": [
+        "cd packages/games/street_scrap && flutter analyze",
+        "cd packages/games/street_scrap && flutter test"
+      ],
+      "notes": "Street Scrap is an independently maintained game package and is validated through its owning package suite."
+    },
+    {
       "id": "frontend-game-module-consumers",
       "repository": "taiwan-brawl-front",
       "requiredFor": [
@@ -80,9 +98,12 @@
       ],
       "commands": [
         "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <Android-emulator-id>",
-        "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <iOS-simulator-id>"
+        "flutter test integration_test/game_resource_native_lifecycle_test.dart -d <iOS-simulator-id>",
+        "flutter test integration_test/game_resource_native_lifecycle_test.dart -d macos",
+        "flutter test integration_test/game_resource_native_lifecycle_test.dart -d windows",
+        "xvfb-run -a flutter test integration_test/game_resource_native_lifecycle_test.dart -d linux"
       ],
-      "notes": "Requires Android Emulator or iOS Simulator and the integration_test Flutter SDK package. Using Hive platform storage and injected HTTP/signature fixtures, the test installs v1, forces update migration failure and verifies v1 rollback, installs v2, closes/reopens Hive and verifies selected module plus installed bytes/version, then removes the resource while keeping the module enabled. GitHub run 39560967185 passed on Android API 35 and iOS Simulator with the minimum iOS target set to 26.0. This is emulator/simulator evidence, not physical-device or production-catalog validation."
+      "notes": "Requires the integration_test Flutter SDK package and a target platform runner; Linux uses Xvfb and GTK build dependencies. Using Hive platform storage and injected HTTP/signature fixtures, the test installs v1, forces update migration failure and verifies v1 rollback, installs v2, closes/reopens Hive and verifies selected module plus installed bytes/version, then removes the resource while keeping the module enabled. Android API 35 and iOS Simulator (minimum iOS target 26.0) have hosted-run evidence. macOS, Windows, and Linux desktop jobs are configured but remain unverified until the updated hosted workflow runs. These are CI platform checks, not physical-device or production-catalog validation."
     },
     {
       "id": "frontend-platform-builds",
@@ -108,8 +129,10 @@
         "p2p-runtime-change"
       ],
       "commands": [
-        "flutter test --platform chrome test/p2p_webrtc_runtime_test.dart"
-      ]
+        "flutter test test/chat_service_offline_test.dart test/chat_service_factory_test.dart",
+        "flutter test --platform chrome test/p2p_webrtc_runtime_test.dart test/chat_service_factory_test.dart test/secure_device_identity_test.dart test/peer_trust_service_test.dart test/peer_trust_dialog_test.dart"
+      ],
+      "notes": "The game-package-platforms workflow runs the real WebRTC runtime and the production ChatService factory, Ed25519 identity, and fingerprint-confirmed trust tests in its p2p-webrtc-runtime Chrome job; changes to those consumer tests trigger the workflow. A VM consumer command covers ChatService offline writes and manual signaling configuration. Local passing tests are not evidence that the remote workflow has run."
     },
     {
       "id": "frontend-standalone-web-build",
@@ -128,11 +151,13 @@
       "requiredFor": [
         "backend-change",
         "api-change",
-        "contract-change"
+        "contract-change",
+        "p2p-runtime-change"
       ],
       "commands": [
         "npm test",
-        "npm run db:migration:rehearse"
+        "npm run db:migration:rehearse",
+        "npm run db:split:rehearse"
       ]
     },
     {

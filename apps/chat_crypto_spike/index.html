@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101715" />
+    <title>聊天加密引擎小樣</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <span class="eyebrow">TAIWAN BRAWL · CHAT</span>
+        <h1>加密引擎可行性小樣</h1>
+        <p>驗證瀏覽器能保存加密狀態，並讓兩個虛構裝置互相加密、解密。</p>
+      </header>
+
+      <section class="notice" aria-label="prototype notice">
+        <strong>隔離測試</strong>
+        <span>不連正式伺服器；測試只在瀏覽器記憶體中運行。請勿輸入真實復原詞或聊天金鑰。</span>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <div>
+            <span class="step">01</span>
+            <h2>Matrix Rust WASM · IndexedDB</h2>
+          </div>
+          <span id="engine-state" class="pill">尚未載入</span>
+        </div>
+
+        <label for="store-passphrase">測試用 store passphrase</label>
+        <input id="store-passphrase" type="password" autocomplete="off" minlength="12" placeholder="至少 12 個字元；只留在此頁記憶體" />
+        <div class="actions">
+          <button id="open-store" class="primary">開啟／還原測試 store</button>
+          <button id="close-store" disabled>關閉 store</button>
+          <button id="wrong-key" disabled>測試錯誤 passphrase</button>
+          <button id="reset-store" class="quiet">重設並刪除測試資料</button>
+        </div>
+        <div id="result" class="result" role="status" aria-live="polite">尚未執行。</div>
+        <dl class="facts">
+          <div><dt>虛構裝置</dt><dd id="device-id">WEB-SPIKE-01</dd></div>
+          <div><dt>身份指紋</dt><dd id="fingerprint">—</dd></div>
+          <div><dt>本機狀態</dt><dd id="persistence">未驗證</dd></div>
+        </dl>
+      </section>
+
+      <section class="panel comparison">
+        <div class="panel-title">
+          <div>
+            <span class="step">02</span>
+            <h2>候選平台檢查</h2>
+          </div>
+        </div>
+        <div class="candidate-grid">
+          <article>
+            <h3>Matrix Rust</h3>
+            <p>瀏覽器 WASM 與 IndexedDB 可在此頁實測。裝置驗證、加密事件和持久狀態採 Matrix 模型；自有聊天 relay、復原詞、P2P 多裝置仍未驗收。</p>
+            <span class="candidate-state">Chrome Web 狀態保存：已通過；跨平台待驗證</span>
+          </article>
+          <article>
+            <h3>Signal libsignal</h3>
+            <p>官方有 Java／Swift wrapper；npm 發佈包帶 Node 原生模組，沒有瀏覽器 WASM build。Flutter Web 尚無可直接使用的官方 wrapper。</p>
+            <span class="candidate-state">Web 直接整合：未通過套件盤點</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <div>
+            <span class="step">03</span>
+            <h2>雙裝置訊息加密</h2>
+          </div>
+        </div>
+        <div class="message-flow" aria-label="加密訊息流程">
+          <div><strong>裝置 A</strong><span>加密訊息與 room key</span></div>
+          <div class="flow-arrow" aria-hidden="true">密文 → 假 key directory → 密文</div>
+          <div><strong>裝置 B</strong><span>解密並比對原文</span></div>
+        </div>
+        <div class="actions">
+          <button id="roundtrip" class="primary">執行雙裝置測試</button>
+        </div>
+        <div id="roundtrip-result" class="result" role="status" aria-live="polite">尚未執行。</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <div>
+            <span class="step">04</span>
+            <h2>兩台裝置核對</h2>
+          </div>
+        </div>
+        <div class="message-flow" aria-label="裝置核對流程">
+          <div><strong>裝置 A</strong><span>發起核對</span></div>
+          <div class="flow-arrow" aria-hidden="true">比對 7 個 emoji</div>
+          <div><strong>裝置 B</strong><span>確認一致</span></div>
+        </div>
+        <p class="verification-note">這裡以兩個虛構裝置模擬；請先比對兩側 emoji，再分別按各自裝置的確認。這不是跨手機實測。</p>
+        <div class="actions">
+          <button id="sas-verification" class="primary">執行裝置核對測試</button>
+          <button id="sas-cancel" class="quiet" disabled>取消核對</button>
+        </div>
+        <div class="verification-grid">
+          <article class="verification-device">
+            <h3>裝置 A</h3>
+            <div id="sas-a-code" class="sas-code" aria-label="裝置 A 的安全比對碼">—</div>
+            <div id="sas-a-status" class="device-status">尚未開始</div>
+            <button id="sas-confirm-a" disabled>我已比對，確認 A</button>
+          </article>
+          <article class="verification-device">
+            <h3>裝置 B</h3>
+            <div id="sas-b-code" class="sas-code" aria-label="裝置 B 的安全比對碼">—</div>
+            <div id="sas-b-status" class="device-status">尚未開始</div>
+            <button id="sas-confirm-b" disabled>我已比對，確認 B</button>
+          </article>
+        </div>
+        <div id="sas-result" class="result" role="status" aria-live="polite">尚未執行。</div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-title">
+          <div>
+            <span class="step">05</span>
+            <h2>分頁間裝置核對</h2>
+          </div>
+          <span id="cross-sas-state" class="pill">未連線</span>
+        </div>
+        <p class="verification-note">先複製 B 分頁連結，再讓此分頁加入 A；連結會自動讓另一分頁加入 B。手動比較七個 emoji，再由兩端各自確認；若不一致請拒絕，逾時也會通知另一端並取消。這只是瀏覽器分頁間的本機傳輸，不代表跨手機或正式 P2P。</p>
+        <label for="cross-sas-session">連線碼</label>
+        <input id="cross-sas-session" autocomplete="off" />
+        <div class="actions">
+          <button id="cross-sas-connect-a" class="primary">此分頁加入 A</button>
+          <button id="cross-sas-copy-b">複製 B 分頁連結</button>
+          <button id="cross-sas-start" disabled>發起核對</button>
+          <button id="cross-sas-accept" disabled>接受核對</button>
+          <button id="cross-sas-confirm" disabled>確認比對一致</button>
+          <button id="cross-sas-reject" class="quiet" disabled>碼不一致，拒絕</button>
+          <button id="cross-sas-cancel" class="quiet" disabled>取消核對</button>
+        </div>
+        <div id="cross-sas-code" class="sas-code cross-sas-code" aria-label="分頁間安全比對碼">—</div>
+        <div id="cross-sas-result" class="result" role="status" aria-live="polite">尚未連線。A、B 必須使用相同連線碼。</div>
+      </section>
+
+      <footer>
+        <span id="module-state">WASM 尚未載入</span>
+        <span>Spike only · 不代表正式 E2EE 已完成</span>
+      </footer>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

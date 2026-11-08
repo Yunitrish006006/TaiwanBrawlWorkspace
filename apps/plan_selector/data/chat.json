@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "planId": "chat",
+  "title": "聊天功能計畫選擇",
+  "subtitle": "先選定產品行為，再依階段逐項開發。每題可以先略過，選擇會保存在這台電腦。",
+  "confirmed": [
+    {
+      "title": "目前先完成一對一 DM",
+      "detail": "這是本輪聊天計畫的範圍；不代表永久排除群組或媒體功能。"
+    },
+    {
+      "title": "P2P 優先",
+      "detail": "有可用連線時優先使用 WebRTC DataChannel；P2P 失敗時先提示玩家，再由玩家決定是否使用伺服器 relay。"
+    },
+    {
+      "title": "離線可讀、離線訊息留在本機",
+      "detail": "已同步到此裝置的歷史可離線查看；離線送出的訊息等連線恢復後重試。"
+    },
+    {
+      "title": "已讀後仍可收回",
+      "detail": "兩端以「訊息已收回」取代原文。"
+    },
+    {
+      "title": "伺服器 relay 必須端對端加密",
+      "detail": "只有對話裝置持有解密能力；加密路徑完成前，正式 App 會阻擋 server relay 傳送。"
+    },
+    {
+      "title": "玩家自行保管復原詞",
+      "detail": "復原詞不交給伺服器；遺失時服務商不能代為復原。"
+    },
+    {
+      "title": "舊裝置同步歷史",
+      "detail": "新舊已啟用裝置需同時開啟並完成信任確認。"
+    },
+    {
+      "title": "通知顯示好友名稱與訊息預覽",
+      "detail": "預覽可能暴露給推播服務及鎖定畫面，與加密正文分開處理。"
+    },
+    {
+      "title": "所有已啟用裝置收妥後才刪除 relay 訊息",
+      "detail": "裝置逐一 ack；撤銷的裝置不再阻擋清除。"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "p2p-fallback",
+      "category": "連線與送達",
+      "stage": "第一階段",
+      "title": "P2P 暫時連不上時，訊息怎麼送？",
+      "context": "離線訊息會先留在本機 outbox。這題決定恢復等待後是否自動透過伺服器 relay 送達；relay 是否能讀取內容要和端對端加密決策一起看。",
+      "options": [
+        {
+          "id": "automatic-relay",
+          "title": "自動改走伺服器 relay",
+          "summary": "最容易送達；P2P 不通時由伺服器暫存並轉送。",
+          "tradeoffs": [
+            "對方不必同時在線",
+            "需要網路與伺服器",
+            "若未採端對端加密，伺服器可能看見訊息內容"
+          ]
+        },
+        {
+          "id": "ask-before-relay",
+          "title": "先提示，再由我選擇 relay",
+          "summary": "保留 P2P 優先；改用伺服器前先讓玩家確認。",
+          "tradeoffs": [
+            "玩家可控制是否經過伺服器",
+            "多一次操作，可能延遲送達",
+            "需要清楚呈現等待與待確認狀態"
+          ],
+          "recommended": true,
+          "current": true
+        },
+        {
+          "id": "direct-only",
+          "title": "只用 P2P，沒有直連就繼續等待",
+          "summary": "伺服器完全不代送聊天內容。",
+          "tradeoffs": [
+            "符合無 relay 的使用方式",
+            "雙方必須重新建立可用直連",
+            "對方離線時不會送達"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "signaling",
+      "category": "連線與送達",
+      "stage": "第一階段",
+      "title": "好友怎麼建立 P2P 連線？",
+      "context": "P2P 傳訊與協商連線是兩件事。手動交換連線資料可以不使用 hosted signaling，但仍需要兩台裝置之間存在網路路徑。",
+      "options": [
+        {
+          "id": "manual-only",
+          "title": "手動交換邀請資料",
+          "summary": "複製／掃描邀請資料，透過其他私人管道交換。",
+          "tradeoffs": [
+            "不依賴本專案的 signaling server",
+            "初次設定較麻煩",
+            "對不熟悉連線設定的玩家不夠直覺"
+          ]
+        },
+        {
+          "id": "hosted-only",
+          "title": "自動 hosted signaling",
+          "summary": "App 透過服務協商連線，玩家不需手動搬運資料。",
+          "tradeoffs": [
+            "使用流程最簡單",
+            "需要可用的 signaling server 與網路",
+            "signaling server 只交換協商資料，不應轉送聊天內容"
+          ]
+        },
+        {
+          "id": "hybrid",
+          "title": "自動連線優先，保留手動方式",
+          "summary": "平常自動協商；服務不可用時仍可手動建立連線。",
+          "tradeoffs": [
+            "易用性與無 hosted signaling 能力兼顧",
+            "需要維護兩種流程",
+            "推薦作為目前架構方向"
+          ],
+          "recommended": true,
+          "current": true
+        }
+      ]
+    },
+    {
+      "id": "message-privacy",
+      "category": "隱私與安全",
+      "stage": "先定方向",
+      "title": "伺服器 relay 能不能讀取訊息內容？",
+      "context": "本機資料已加密、事件有裝置簽章，WebRTC 傳輸也有加密；這些都不代表伺服器 relay 看不到它收到的訊息內容。",
+      "options": [
+        {
+          "id": "e2ee-required",
+          "title": "要求端對端加密",
+          "summary": "只有對話裝置持有解密金鑰，relay 只轉送密文。",
+          "tradeoffs": [
+            "伺服器無法讀取訊息正文",
+            "多裝置、金鑰輪替與歷史恢復較複雜",
+            "需要在 relay 內容保護完成後再啟用自動 fallback"
+          ],
+          "recommended": true,
+          "current": true
+        },
+        {
+          "id": "transport-only",
+          "title": "先採傳輸加密與本機加密",
+          "summary": "連線與裝置儲存有加密，但 relay 端可能處理可讀內容。",
+          "tradeoffs": [
+            "實作與帳號復原較簡單",
+            "必須信任伺服器及其管理者",
+            "不符合伺服器完全看不到內容的要求"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "key-recovery",
+      "category": "隱私與安全",
+      "stage": "先定方向",
+      "title": "換手機或遺失裝置時，聊天金鑰怎麼恢復？",
+      "context": "此選項主要在要求端對端加密時生效。恢復能力越高，設計與保護責任越大。",
+      "options": [
+        {
+          "id": "device-only",
+          "title": "只留在原裝置，不提供金鑰復原",
+          "summary": "失去裝置就失去該裝置無法同步的歷史。",
+          "tradeoffs": [
+            "伺服器與服務商無法替玩家復原金鑰",
+            "最簡單、暴露面最小",
+            "換機前需自行匯出或接受歷史遺失"
+          ]
+        },
+        {
+          "id": "recovery-phrase",
+          "title": "玩家自行保管復原詞",
+          "summary": "新裝置輸入復原詞後解鎖加密歷史。",
+          "tradeoffs": [
+            "服務商不持有復原能力",
+            "玩家遺失復原詞仍無法救回",
+            "需設計安全的匯出、驗證與重設流程"
+          ],
+          "recommended": true,
+          "current": true
+        },
+        {
+          "id": "trusted-device",
+          "title": "由已信任的舊裝置授權新裝置",
+          "summary": "使用者在舊裝置確認後，安全加入新裝置。",
+          "tradeoffs": [
+            "不必抄寫復原詞",
+            "舊裝置必須仍可使用",
+            "需設計裝置撤銷與遺失處理"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "history-sync",
+      "category": "離線與多裝置",
+      "stage": "後續擴充",
+      "title": "新裝置要不要取得舊聊天歷史？",
+      "context": "本機離線查看已經是基本需求；這題只決定跨裝置歷史搬移。伺服器備份若要使用，應先完成端對端加密與金鑰復原設計。",
+      "options": [
+        {
+          "id": "local-only",
+          "title": "每台裝置各自保存，不同步舊歷史",
+          "summary": "新裝置從加入後開始累積訊息。",
+          "tradeoffs": [
+            "不需伺服器保存歷史",
+            "流程簡單",
+            "換機不會自動看到舊對話"
+          ],
+          "recommended": true
+        },
+        {
+          "id": "manual-transfer",
+          "title": "玩家自行加密匯出與匯入",
+          "summary": "換機時透過玩家控制的檔案搬移歷史。",
+          "tradeoffs": [
+            "不依賴雲端保存",
+            "要保護匯出檔及解鎖資訊",
+            "需額外設計搬移及重複匯入處理"
+          ]
+        },
+        {
+          "id": "trusted-device-live-sync",
+          "title": "透過已啟用的舊裝置同步（新舊裝置同時開啟）",
+          "summary": "新裝置與已啟用的舊裝置同時在線並完成信任確認後，由舊裝置傳送可同步的聊天歷史。",
+          "tradeoffs": [
+            "不需伺服器長期保存聊天歷史",
+            "舊裝置必須可用且保有要同步的資料",
+            "需設計裝置配對、傳輸中斷續傳、重複匯入與撤銷流程"
+          ],
+          "current": true
+        },
+        {
+          "id": "encrypted-relay-backup",
+          "title": "伺服器保存端對端加密備份",
+          "summary": "新裝置在取得解密金鑰後下載密文歷史。",
+          "tradeoffs": [
+            "換機較方便",
+            "需要伺服器儲存與清除政策",
+            "依賴端對端加密、復原及備份版本設計"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notifications",
+      "category": "通知與隱私",
+      "stage": "後續擴充",
+      "title": "鎖定畫面通知要顯示多少訊息？",
+      "context": "推播只負責提醒，不是訊息來源。顯示越多內容越方便，也越可能暴露在鎖定畫面或推播服務中。",
+      "options": [
+        {
+          "id": "preview-text",
+          "title": "顯示好友名稱與訊息預覽",
+          "summary": "玩家可直接從通知判斷訊息內容。",
+          "tradeoffs": [
+            "查看最快",
+            "鎖定畫面可能展示私人內容",
+            "若使用端對端加密，推播預覽需由可信裝置產生"
+          ],
+          "current": true
+        },
+        {
+          "id": "generic-alert",
+          "title": "只顯示「有新訊息」",
+          "summary": "不把正文放進推播 payload。",
+          "tradeoffs": [
+            "降低內容暴露",
+            "仍能提醒玩家回到 App",
+            "需開啟 App 才能閱讀"
+          ],
+          "recommended": true
+        },
+        {
+          "id": "no-remote-push",
+          "title": "不使用遠端推播",
+          "summary": "只有 App 開啟或 P2P 連線時更新。",
+          "tradeoffs": [
+            "不向推播服務提供通知 metadata",
+            "離線時不會即時提醒",
+            "玩家需自行打開 App 查看"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "multi-device-relay-ack",
+      "category": "離線與多裝置",
+      "stage": "第三階段",
+      "title": "同帳號多台裝置，relay 要等誰收妥才刪訊息？",
+      "context": "目前伺服器以帳號為單位 ack：第一台裝置收妥後，pending row 就會刪除，其他離線裝置可能收不到。改成逐裝置 ack 需要登記／撤銷裝置，並定義長期離線裝置如何處理。",
+      "options": [
+        {
+          "id": "all-active-devices-ack",
+          "title": "所有已啟用裝置都收妥後才刪除",
+          "summary": "relay 分別記錄每台裝置的 ack，所有仍啟用的裝置收妥後才刪除 pending row。",
+          "tradeoffs": [
+            "已啟用的離線裝置可稍後收到訊息",
+            "需要可靠的裝置登記與撤銷",
+            "失聯裝置可能讓伺服器保留 pending 訊息直到撤銷或設定期限"
+          ],
+          "recommended": true,
+          "current": true
+        },
+        {
+          "id": "any-device-ack",
+          "title": "同帳號任一裝置收妥即可刪除",
+          "summary": "保留目前帳號級 ack；第一台成功持久化的裝置 ack 後，伺服器就刪除訊息。",
+          "tradeoffs": [
+            "伺服器較快清除 pending 訊息",
+            "其他離線裝置可能收不到 relay 訊息",
+            "其他裝置需在舊裝置仍開啟時用裝置同步補足"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crypto-engine-spike",
+      "category": "隱私與安全",
+      "stage": "第 4 階段",
+      "title": "端對端加密要以哪個跨平台密碼引擎為基礎？",
+      "context": "不能自行拼裝加密演算法。Signal libsignal 官方提供 Java、Swift、TypeScript wrapper，但明確表示 Signal 以外使用不受支援，且 API 可能變更。Matrix Rust SDK 官方 FFI manifest 列出 Android、iOS、JS/WASM 產物；另有瀏覽器 WASM crypto binding 與 IndexedDB 儲存路徑，但採 Matrix 裝置、驗證與事件模型。這些官方 binding target 不代表已能直接接入本專案或 Flutter。選引擎前要以實際 build 與持久化測試確認 iOS、Android、Web。",
+      "options": [
+        {
+          "id": "matrix-rust-crypto",
+          "title": "以 Matrix Rust 加密引擎為核心",
+          "summary": "評估 Matrix 官方 Rust crypto state machine 與 FFI/WASM binding，再以 Flutter adapter 接入。",
+          "tradeoffs": [
+            "官方 manifest 列出 Android、iOS 與 JS/WASM 產物；瀏覽器 crypto package 支援 IndexedDB store",
+            "需適配 Matrix 裝置／驗證／事件模型與自有 relay，不能把 SDK binding 當成現成 Flutter plugin",
+            "須實測三平台 build、資料庫升級、金鑰復原及裝置撤銷流程"
+          ]
+        },
+        {
+          "id": "signal-libsignal",
+          "title": "以 Signal libsignal 為核心",
+          "summary": "以 Java、Swift、TypeScript wrapper 建立 Flutter Android、iOS、Web 平台橋接。",
+          "tradeoffs": [
+            "官方 wrappers 覆蓋 Java、Swift、TypeScript，底層實作使用 Rust",
+            "官方明確表示 Signal 以外用途不受支援，且 API／實作可能變更",
+            "須實測瀏覽器 package 與 Flutter Web、跨平台 ratchet state 持久化和升級"
+          ]
+        },
+        {
+          "id": "crypto-engine-spike",
+          "title": "先做跨平台可行性小樣",
+          "summary": "用隔離原型比較候選引擎的瀏覽器與手機儲存、裝置配對、復原及 relay 密文流程，再決定正式引擎。",
+          "tradeoffs": [
+            "先驗證實際產品平台與裝置同步需求",
+            "原型完成前不開啟聲稱安全的 relay E2EE",
+            "需先投入一個有明確驗收條件的技術切片"
+          ],
+          "recommended": true
+        }
+      ]
+    }
+  ]
+}

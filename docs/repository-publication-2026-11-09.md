@@ -143,3 +143,5 @@ App Group acceptance. No production deployment, branch merge, remote migration
 or Apple capability change was part of this CI correction. The other published
 owner repository heads above remain unchanged. The coordination regression now
 recognizes the traced Linux command while retaining the native platform checks.
+Its hosted validation pins now select the final published frontend and backend
+commits above, so boundary tests inspect the same owner source verified locally.

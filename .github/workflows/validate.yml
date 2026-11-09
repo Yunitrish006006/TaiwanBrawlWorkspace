@@ -21,13 +21,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Yunitrish006006/taiwan_brawl_front
-          ref: f46c4d0da933c4773533fc288fb36bbfc8ce4ed8
+          ref: dfb95c46d1f397a68ab21aef66f6c4ace3f948d3
           path: _validation/taiwan_brawl_front
       - name: Checkout architecture backend source
         uses: actions/checkout@v4
         with:
           repository: Yunitrish006006/taiwan_brawl_back
-          ref: 87210469faacc6162557ca2bae6ea224f22fced3
+          ref: d5fff5cdeb24b7f4e8468929285c1763196d77e6
           path: _validation/taiwan_brawl_back
       - name: Expose sibling repository paths to boundary tests
         run: |

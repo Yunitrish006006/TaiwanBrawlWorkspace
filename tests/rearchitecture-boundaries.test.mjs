@@ -826,7 +826,7 @@ test('game package CI checks native runner platforms without publishing', async 
   assert.match(workflow, /Linux desktop/);
   assert.match(
     workflow,
-    /xvfb-run -a flutter test integration_test\/game_resource_native_lifecycle_test\.dart -d linux/,
+    /xvfb-run -a strace -f -e trace=process,signal -o linux-process\.log flutter test integration_test\/game_resource_native_lifecycle_test\.dart -d linux/,
   );
   assert.match(workflow, /integration_test\/game_resource_native_lifecycle_test\.dart/);
   assert.match(workflow, /integration_test\/\*\*/);

@@ -73,3 +73,73 @@ package jobs must not be reported as passing before the rerun confirms them.
 These are time-bounded CI observations, not claims that every hosted platform
 or production release has passed. The local preview and its isolated state were
 left running for the user's two-account tests.
+
+## Frontend CI follow-up
+
+The subsequent 63cc6eb run passed all six App builds and the real resource
+lifecycle on Windows, macOS and the iOS Simulator. The Linux lifecycle, Android
+emulator startup and two platform golden checks still failed; that run is not
+an all-platform pass.
+
+The next published correction is
+[a9fc9be](https://github.com/Yunitrish006006/taiwan_brawl_front/commit/a9fc9beac67ba9aee5bd7fe2c85820084c8798bc):
+
+- Signed fixture bytes keep LF line endings on Windows. Native fixtures declare
+  their supported schema and validate the synthetic payload before migration.
+  The same install/rollback/update/reopen/remove scenario also runs with real
+  Hive storage in the VM suite.
+- Golden test scenes use whole-pixel geometry and exact binary image scales.
+  Only two expected test images changed; production artwork and strict pixel
+  comparison remain unchanged. Linux and Windows previously produced identical
+  differences against fractional-layout macOS baselines.
+- The native wrapper renders a first frame before the I/O scenario. Linux keeps
+  process/signal diagnostics on failure. Android CI grants its ephemeral runner
+  access to KVM rather than booting x86_64 without hardware acceleration.
+
+Observed local follow-up validation: frontend analysis passed, both native
+fixture tests passed, all 346 Street Scrap tests passed, strict golden comparison
+passed and the workflow YAML parsed successfully. The published frontend SHA was
+verified against the remote branch. Hosted results are tracked in
+[the follow-up run](https://github.com/Yunitrish006006/taiwan_brawl_front/actions/runs/42560518590);
+its final status must be checked before claiming all platforms passed.
+
+The a9fc9be run subsequently passed the Android emulator lifecycle and the
+material-grid golden on Linux, but the enlarged sprite golden still differed.
+The follow-up
+[150082d](https://github.com/Yunitrish006006/taiwan_brawl_front/commit/150082db89ef21ff15b128809673f69c036233e7)
+uses exactly 1/4 scaling for that scene, removes previously tracked golden
+failure output (preserving local files) and ignores future failure output.
+The 32 sprite tests passed locally and the full Linux game-package job passed
+in [its hosted run](https://github.com/Yunitrish006006/taiwan_brawl_front/actions/runs/42562643714).
+Linux native integration diagnostics separately showed SIGABRT before test
+execution; this remains an open CI host issue pending a native backtrace.
+The integration scenario now has an explicit two-minute test timeout and the
+Linux invocation has a ten-minute step limit, with failure diagnostics retained.
+
+All three desktop game-package jobs passed for 150082d. Native backtrace
+diagnostics from
+[253ed5a](https://github.com/Yunitrish006006/taiwan_brawl_front/commit/253ed5a7af8f5aab68016dbe217311c65aa1586d)
+then identified Linux startup failure in WebRTC's audio device module:
+`adm->Init()` returned -1 and aborted before the Dart scenario started.
+The CI host correction in
+[dfb95c4](https://github.com/Yunitrish006006/taiwan_brawl_front/commit/dfb95c46d1f397a68ab21aef66f6c4ace3f948d3)
+starts PulseAudio with a virtual null sink and monitor source. Real native
+plugin registration and all lifecycle assertions remain enabled.
+The corrected Linux desktop lifecycle job passed in
+[the final follow-up run](https://github.com/Yunitrish006006/taiwan_brawl_front/actions/runs/42563530156).
+
+### Final hosted verification
+
+The final run completed successfully: all 21 jobs passed for published frontend
+commit dfb95c46d1f397a68ab21aef66f6c4ace3f948d3 on
+codex/taiwan-brawl-modular-ci. This includes all six App builds (Android, iOS,
+Web, Windows, macOS and Linux), real resource lifecycle tests on all five native
+platforms, strict game-package checks on all three desktop runners, native
+storage checks on all three runners, browser IndexedDB, browser P2P, shared Dart
+packages and frontend consumers. No failed or unfinished job remains in that run.
+
+The iOS build and Simulator results do not establish signed iPhone widget or
+App Group acceptance. No production deployment, branch merge, remote migration
+or Apple capability change was part of this CI correction. The other published
+owner repository heads above remain unchanged. The coordination regression now
+recognizes the traced Linux command while retaining the native platform checks.

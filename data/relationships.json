@@ -54,6 +54,14 @@
       "ownership": "shared package owns transport-neutral messaging and identity/storage ports; frontend owns platform adapters"
     },
     {
+      "id": "front-minesweeper",
+      "from": "taiwan-brawl-front",
+      "to": "taiwan-brawl-minesweeper",
+      "classification": "build-hard",
+      "protocol": "Flutter path dependency ../taiwan_brawl_minesweeper",
+      "ownership": "minesweeper repository owns game rules and UI; frontend owns host registration, route and Home entry"
+    },
+    {
       "id": "deploy-build-front",
       "from": "taiwan-brawl-back",
       "to": "taiwan-brawl-front",

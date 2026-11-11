@@ -68,6 +68,18 @@
       "notes": "Street Scrap is an independently maintained game package and is validated through its owning package suite."
     },
     {
+      "id": "minesweeper-package",
+      "repository": "taiwan-brawl-minesweeper",
+      "requiredFor": [
+        "game-module-change"
+      ],
+      "commands": [
+        "flutter analyze",
+        "flutter test"
+      ],
+      "notes": "The standalone owner repository validates the core rules and Flutter example; physical-device drag behavior remains unevaluated locally."
+    },
+    {
       "id": "frontend-game-module-consumers",
       "repository": "taiwan-brawl-front",
       "requiredFor": [

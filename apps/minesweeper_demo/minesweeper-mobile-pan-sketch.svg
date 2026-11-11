@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="430" height="932" viewBox="0 0 430 932" role="img" aria-labelledby="title desc">
+  <title id="title">踩地雷手機版固定視窗與長按滑動 UI</title>
+  <desc id="desc">沿用第一版手機排版，9x9、16x16、25x25 使用相同大小的棋盤視窗，長按後滑動移動視角。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#162b2b"/><stop offset="1" stop-color="#29453d"/></linearGradient>
+    <pattern id="cell" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#5d806b"/><path d="M24 0H0V24" fill="none" stroke="#d2bd7a" stroke-width="1.5"/></pattern>
+    <clipPath id="window"><rect x="39" y="327" width="352" height="352" rx="14"/></clipPath>
+    <filter id="shadow"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#071817" flood-opacity=".35"/></filter>
+  </defs>
+  <rect width="430" height="932" rx="34" fill="url(#bg)"/>
+  <g font-family="system-ui, sans-serif">
+    <text x="28" y="36" fill="#f6e7b4" font-size="13" font-weight="700">9:41</text>
+    <text x="28" y="83" fill="#f6e7b4" font-size="22" font-weight="900">踩地雷</text>
+    <text x="28" y="106" fill="#9db5a2" font-size="12" letter-spacing="2">TAIWAN BRAWL · DAILY BOARD</text>
+    <circle cx="386" cy="83" r="21" fill="#36564b" stroke="#688873"/><path d="M378 83h16M386 75v16" stroke="#e6be5b" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- same compact first-version layout -->
+    <g transform="translate(24 132)">
+      <rect width="382" height="80" rx="18" fill="#f6e7b4"/>
+      <rect x="12" y="12" width="170" height="56" rx="13" fill="#294a40"/>
+      <path d="M32 31v20M32 31l18 8-18 8M32 51h18" stroke="#e6be5b" stroke-width="3"/>
+      <text x="67" y="35" fill="#9db5a2" font-size="11" font-weight="800">剩餘地雷</text><text x="67" y="57" fill="#f6e7b4" font-size="23" font-family="ui-monospace, monospace" font-weight="900">42</text>
+      <path d="M193 20v40" stroke="#c5aa64" stroke-width="2"/><text x="216" y="35" fill="#66806d" font-size="11" font-weight="800">遊戲時間</text><text x="216" y="58" fill="#294a40" font-size="23" font-family="ui-monospace, monospace" font-weight="900">04:18</text>
+    </g>
+    <g transform="translate(24 230)">
+      <text y="14" fill="#9db5a2" font-size="11" font-weight="800" letter-spacing="2">BOARD SIZE</text>
+      <rect y="25" width="382" height="45" rx="14" fill="#294a40" stroke="#688873"/>
+      <text x="64" y="53" text-anchor="middle" fill="#9db5a2" font-size="14" font-weight="700">9 × 9</text>
+      <rect x="128" y="32" width="116" height="31" rx="9" fill="#e6be5b"/><text x="186" y="53" text-anchor="middle" fill="#294a40" font-size="14" font-weight="900">16 × 16</text>
+      <text x="316" y="53" text-anchor="middle" fill="#9db5a2" font-size="14" font-weight="700">25 × 25</text>
+    </g>
+
+    <!-- fixed 352x352 viewport: large boards keep 24px cells and extend beyond it -->
+    <g filter="url(#shadow)">
+      <rect x="24" y="312" width="382" height="382" rx="20" fill="#294a40"/>
+      <g clip-path="url(#window)">
+        <rect x="39" y="327" width="600" height="600" fill="url(#cell)"/>
+        <g font-family="ui-monospace, monospace" font-size="18" font-weight="900" text-anchor="middle" dominant-baseline="middle">
+          <text x="66" y="370" fill="#f2e2ac">1</text><text x="90" y="394" fill="#e6be5b">⚑</text><text x="138" y="418" fill="#d46e4c">2</text><text x="210" y="466" fill="#3b72a1">1</text><text x="282" y="514" fill="#d46e4c">3</text><text x="330" y="562" fill="#3b72a1">1</text><text x="186" y="610" fill="#e6be5b">⚑</text><text x="354" y="634" fill="#d46e4c">2</text>
+        </g>
+        <rect x="183" y="472" width="48" height="48" fill="#83a48a" stroke="#e6be5b" stroke-width="4"/>
+      </g>
+    </g>
+    <text x="215" y="716" text-anchor="middle" fill="#f6e7b4" font-size="13" font-weight="800">長按後滑動，移動棋盤視角</text>
+    <text x="215" y="737" text-anchor="middle" fill="#9db5a2" font-size="12">格子大小固定 · 上下左右皆可移動</text>
+    <rect x="24" y="765" width="180" height="58" rx="17" fill="#e6be5b"/><text x="114" y="801" text-anchor="middle" fill="#294a40" font-size="15" font-weight="900">重新開始</text>
+    <rect x="218" y="765" width="188" height="58" rx="17" fill="#294a40" stroke="#688873"/><text x="312" y="801" text-anchor="middle" fill="#f6e7b4" font-size="15" font-weight="900">暫停遊戲</text>
+    <text x="215" y="876" text-anchor="middle" fill="#789184" font-size="12" letter-spacing="1">SAFE CELLS  /  214 OF 256</text>
+    <path d="M175 902h80" stroke="#688873" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

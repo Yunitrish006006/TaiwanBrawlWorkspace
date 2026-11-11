@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="430" height="932" viewBox="0 0 430 932" role="img" aria-labelledby="title desc">
+  <title id="title">Taiwan Brawl 踩地雷手機版 UI 草圖</title>
+  <desc id="desc">手機直式踩地雷遊戲介面，包含頂部狀態、九乘九棋盤、底部操作列與重新開始按鈕。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#162b2b"/><stop offset="1" stop-color="#29453d"/></linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#71937b"/><stop offset="1" stop-color="#4d705d"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#071817" flood-opacity=".35"/></filter>
+  </defs>
+  <rect width="430" height="932" rx="34" fill="url(#bg)"/>
+  <path d="M0 770c112-51 198 18 310-25 49-19 83-21 120-9v196H0Z" fill="#112525" opacity=".55"/>
+
+  <!-- status bar -->
+  <g font-family="system-ui, sans-serif">
+    <text x="28" y="36" fill="#f6e7b4" font-size="13" font-weight="700">9:41</text>
+    <path d="M364 27h18M388 23h4v8h-4zM400 20h4v11h-4z" stroke="#f6e7b4" stroke-width="2" stroke-linecap="round"/>
+    <text x="28" y="83" fill="#f6e7b4" font-size="22" font-weight="900" letter-spacing="1">踩地雷</text>
+    <text x="28" y="106" fill="#9db5a2" font-size="12" letter-spacing="2">TAIWAN BRAWL · DAILY BOARD</text>
+    <circle cx="386" cy="83" r="21" fill="#36564b" stroke="#688873"/>
+    <path d="M378 83h16M386 75v16" stroke="#e6be5b" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- compact stats -->
+  <g transform="translate(24 132)" filter="url(#shadow)">
+    <rect width="382" height="80" rx="18" fill="#f6e7b4"/>
+    <rect x="12" y="12" width="170" height="56" rx="13" fill="#294a40"/>
+    <path d="M32 31v20M32 31l18 8-18 8" stroke="#e6be5b" stroke-width="3"/><path d="M32 51h18" stroke="#e6be5b" stroke-width="3"/>
+    <text x="67" y="35" fill="#9db5a2" font-size="11" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="1">剩餘地雷</text>
+    <text x="67" y="57" fill="#f6e7b4" font-size="23" font-family="ui-monospace, monospace" font-weight="900">08</text>
+    <path d="M193 20v40" stroke="#c5aa64" stroke-width="2"/>
+    <text x="216" y="35" fill="#66806d" font-size="11" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="1">遊戲時間</text>
+    <text x="216" y="58" fill="#294a40" font-size="23" font-family="ui-monospace, monospace" font-weight="900">01:24</text>
+  </g>
+
+  <!-- board -->
+  <g transform="translate(24 244)" filter="url(#shadow)">
+    <rect width="382" height="382" rx="20" fill="#294a40"/>
+    <g transform="translate(14 14)" stroke="#d2bd7a" stroke-width="2">
+      <path fill="url(#tile)" d="M0 0h354v354H0z"/>
+      <path d="M39.33 0v354M78.66 0v354M118 0v354M157.33 0v354M196.66 0v354M236 0v354M275.33 0v354M314.66 0v354M0 39.33h354M0 78.66h354M0 118h354M0 157.33h354M0 196.66h354M0 236h354M0 275.33h354M0 314.66h354" fill="none"/>
+      <!-- revealed area -->
+      <path fill="#f2e2ac" d="M0 0h39.33v39.33H0zM39.33 0h39.33v39.33H39.33zM78.66 0H118v39.33H78.66zM118 0h39.33v39.33H118zM157.33 0H196.66v39.33H157.33zM0 39.33h39.33v39.33H0zM39.33 39.33h39.33v39.33H39.33zM78.66 39.33H118v39.33H78.66zM118 39.33h39.33v39.33H118zM157.33 39.33H196.66v39.33H157.33zM196.66 39.33H236v39.33H196.66zM0 78.66h39.33V118H0zM39.33 78.66h39.33V118H39.33zM78.66 78.66H118V118H78.66zM118 78.66h39.33V118H118zM157.33 78.66H196.66V118H157.33zM196.66 78.66H236V118H196.66zM236 78.66h39.33V118H236zM0 118h39.33v39.33H0zM39.33 118h39.33v39.33H39.33zM78.66 118H118v39.33H78.66zM118 118h39.33v39.33H118zM157.33 118H196.66v39.33H157.33zM0 157.33h39.33v39.33H0zM39.33 157.33h39.33v39.33H39.33zM78.66 157.33H118v39.33H78.66zM118 157.33h39.33v39.33H118zM157.33 157.33H196.66v39.33H157.33zM196.66 157.33H236v39.33H196.66zM236 157.33h39.33v39.33H236zM275.33 157.33h39.33v39.33H275.33zM314.66 157.33H354v39.33H314.66z"/>
+      <!-- flags -->
+      <g fill="#d46e4c" stroke="#294a40" stroke-width="2"><path d="M200 6v27M200 6l18 8-18 8"/><path d="M318 84v27M318 84l18 8-18 8"/><path d="M239 202v27M239 202l18 8-18 8"/></g>
+      <rect x="275.33" y="0" width="39.33" height="39.33" fill="#83a48a" stroke="#e6be5b" stroke-width="4"/>
+    </g>
+    <g font-family="ui-monospace, monospace" font-size="22" font-weight="900" text-anchor="middle" dominant-baseline="middle">
+      <text x="112" y="34" fill="#3b72a1">1</text><text x="151" y="34" fill="#d46e4c">2</text><text x="190" y="34" fill="#3b72a1">1</text>
+      <text x="73" y="73" fill="#d46e4c">2</text><text x="112" y="73" fill="#d46e4c">3</text><text x="151" y="73" fill="#3b72a1">1</text><text x="230" y="73" fill="#3b72a1">1</text>
+      <text x="73" y="112" fill="#d46e4c">2</text><text x="112" y="112" fill="#3b72a1">1</text><text x="151" y="112" fill="#d46e4c">2</text><text x="269" y="112" fill="#3b72a1">1</text>
+      <text x="112" y="190" fill="#d46e4c">2</text><text x="151" y="190" fill="#3b72a1">1</text><text x="230" y="190" fill="#d46e4c">3</text>
+    </g>
+  </g>
+
+  <!-- hint and actions -->
+  <g font-family="system-ui, sans-serif">
+    <rect x="24" y="648" width="382" height="56" rx="16" fill="#345449" stroke="#688873"/>
+    <circle cx="53" cy="676" r="14" fill="#e6be5b"/><text x="53" y="681" text-anchor="middle" fill="#345449" font-size="18" font-weight="900">i</text>
+    <text x="78" y="672" fill="#f6e7b4" font-size="13" font-weight="800">點擊翻開格子</text><text x="78" y="691" fill="#9db5a2" font-size="12">長按可以標記地雷</text>
+    <rect x="24" y="730" width="180" height="58" rx="17" fill="#e6be5b"/>
+    <text x="114" y="766" text-anchor="middle" fill="#294a40" font-size="15" font-weight="900">重新開始</text>
+    <rect x="218" y="730" width="188" height="58" rx="17" fill="#294a40" stroke="#688873"/>
+    <text x="312" y="766" text-anchor="middle" fill="#f6e7b4" font-size="15" font-weight="900">暫停遊戲</text>
+    <text x="215" y="845" text-anchor="middle" fill="#789184" font-size="12" letter-spacing="1">SAFE CELLS 45 / 81</text>
+    <path d="M175 873h80" stroke="#688873" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

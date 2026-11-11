@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">Taiwan Brawl 踩地雷遊戲設計草圖</title>
+  <desc id="desc">以深綠與暖黃色為主色的踩地雷遊戲桌面介面，包含標題、剩餘地雷、計時器、九乘九棋盤與操作說明。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#162b2b"/><stop offset="1" stop-color="#29453d"/></linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f6e7b4"/><stop offset="1" stop-color="#dfc982"/></linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#6f9078"/><stop offset="1" stop-color="#4f715f"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#071817" flood-opacity=".35"/></filter>
+    <pattern id="grain" width="18" height="18" patternUnits="userSpaceOnUse"><path d="M0 4h18M0 13h18" stroke="#fff" stroke-opacity=".035"/></pattern>
+  </defs>
+
+  <rect width="1200" height="820" fill="url(#bg)"/>
+  <rect width="1200" height="820" fill="url(#grain)"/>
+  <path d="M0 685c180-80 300 28 492-31 204-63 309-35 708 48v118H0Z" fill="#112525" opacity=".55"/>
+
+  <!-- top bar -->
+  <g transform="translate(72 48)">
+    <path d="M0 18 18 0h42l18 18v43H0Z" fill="#e6be5b"/>
+    <path d="m20 27 19-14 20 14v24H20Z" fill="#314f46"/>
+    <circle cx="39" cy="35" r="6" fill="#e6be5b"/><path d="M39 18v-8M29 20l-5-7M49 20l5-7" stroke="#314f46" stroke-width="4" stroke-linecap="round"/>
+    <text x="102" y="28" fill="#f6e7b4" font-size="29" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="2">TAIWAN BRAWL</text>
+    <text x="104" y="58" fill="#9db5a2" font-size="17" font-family="system-ui, sans-serif" letter-spacing="5">MINESWEEPER / 踩地雷</text>
+    <rect x="890" y="5" width="112" height="42" rx="21" fill="#36564b" stroke="#688873"/>
+    <circle cx="916" cy="26" r="12" fill="#e6be5b"/><path d="M911 26h10M916 21v10" stroke="#36564b" stroke-width="3"/>
+    <text x="938" y="32" fill="#f6e7b4" font-size="16" font-family="system-ui, sans-serif" font-weight="700">設定</text>
+  </g>
+
+  <!-- game card -->
+  <g transform="translate(72 145)" filter="url(#shadow)">
+    <rect width="1056" height="596" rx="28" fill="url(#panel)"/>
+    <rect x="24" y="24" width="1008" height="548" rx="20" fill="#f9efc9" stroke="#c5aa64" stroke-width="2"/>
+
+    <!-- left status -->
+    <g transform="translate(62 62)">
+      <text fill="#345449" font-size="16" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="3">DAILY BOARD  /  01</text>
+      <text y="52" fill="#1d3933" font-size="38" font-family="system-ui, sans-serif" font-weight="900">島嶼探雷任務</text>
+      <text y="83" fill="#66806d" font-size="17" font-family="system-ui, sans-serif">小心每一步，找出所有安全格。</text>
+
+      <rect y="126" width="160" height="78" rx="16" fill="#294a40"/>
+      <text x="20" y="153" fill="#9db5a2" font-size="13" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="2">MINES LEFT</text>
+      <text x="20" y="188" fill="#f6e7b4" font-size="31" font-family="ui-monospace, monospace" font-weight="800">08</text>
+      <path d="M123 150h20v22h-20z" fill="#e6be5b"/><path d="M133 150v-8m-8 12 8-5 8 5" stroke="#294a40" stroke-width="3"/>
+
+      <rect x="178" y="126" width="160" height="78" rx="16" fill="#294a40"/>
+      <text x="198" y="153" fill="#9db5a2" font-size="13" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="2">TIME</text>
+      <text x="198" y="188" fill="#f6e7b4" font-size="31" font-family="ui-monospace, monospace" font-weight="800">01:24</text>
+
+      <rect y="230" width="338" height="74" rx="16" fill="#e9d795" stroke="#d0b66d"/>
+      <circle cx="35" cy="267" r="17" fill="#d46e4c"/><path d="M28 267h14M35 260v14" stroke="#fff0c8" stroke-width="3"/>
+      <text x="65" y="263" fill="#345449" font-size="15" font-family="system-ui, sans-serif" font-weight="800">遊戲進行中</text>
+      <text x="65" y="285" fill="#66806d" font-size="13" font-family="system-ui, sans-serif">左鍵翻開・右鍵插旗</text>
+
+      <path d="M0 352h338" stroke="#cdb36e"/>
+      <text y="388" fill="#345449" font-size="14" font-family="system-ui, sans-serif" font-weight="800" letter-spacing="2">QUICK GUIDE</text>
+      <text y="420" fill="#66806d" font-size="14" font-family="system-ui, sans-serif">數字代表周圍的地雷數量</text>
+      <text y="449" fill="#66806d" font-size="14" font-family="system-ui, sans-serif">標記所有地雷即可完成關卡</text>
+      <rect y="478" width="338" height="48" rx="14" fill="#345449"/>
+      <text x="169" y="508" text-anchor="middle" fill="#f6e7b4" font-size="15" font-family="system-ui, sans-serif" font-weight="800">重新開始這一局</text>
+    </g>
+
+    <!-- board -->
+    <g transform="translate(452 62)">
+      <rect x="-18" y="-18" width="520" height="520" rx="20" fill="#294a40"/>
+      <g stroke="#d2bd7a" stroke-width="3">
+        <!-- 9x9 tile grid, 52px cells -->
+        <path fill="url(#tile)" d="M0 0h468v468H0z"/>
+        <path d="M52 0v468M104 0v468M156 0v468M208 0v468M260 0v468M312 0v468M364 0v468M416 0v468M0 52h468M0 104h468M0 156h468M0 208h468M0 260h468M0 312h468M0 364h468M0 416h468" fill="none"/>
+      </g>
+      <!-- revealed cells -->
+      <g fill="#f2e2ac" stroke="#d2bd7a" stroke-width="3">
+        <path d="M0 0h52v52H0zM52 0h52v52H52zM104 0h52v52h-52zM156 0h52v52h-52zM208 0h52v52h-52zM0 52h52v52H0zM52 52h52v52H52zM104 52h52v52h-52zM156 52h52v52h-52zM208 52h52v52h-52zM260 52h52v52h-52zM0 104h52v52H0zM52 104h52v52H52zM104 104h52v52h-52zM156 104h52v52h-52zM208 104h52v52h-52zM260 104h52v52h-52zM312 104h52v52h-52zM0 156h52v52H0zM52 156h52v52H52zM104 156h52v52h-52zM156 156h52v52h-52zM208 156h52v52h-52zM0 208h52v52H0zM52 208h52v52H52zM104 208h52v52h-52zM156 208h52v52h-52zM208 208h52v52h-52zM260 208h52v52h-52zM312 208h52v52h-52zM364 208h52v52h-52zM416 208h52v52h-52zM0 260h52v52H0zM52 260h52v52H52zM104 260h52v52h-52zM156 260h52v52h-52zM208 260h52v52h-52zM260 260h52v52h-52zM0 312h52v52H0zM52 312h52v52H52zM104 312h52v52h-52zM156 312h52v52h-52zM208 312h52v52h-52zM260 312h52v52h-52zM312 312h52v52h-52zM364 312h52v52h-52zM0 364h52v52H0zM52 364h52v52H52zM104 364h52v52h-52zM156 364h52v52h-52zM208 364h52v52h-52zM260 364h52v52h-52zM312 364h52v52h-52zM364 364h52v52h-52zM416 364h52v52h-52z"/>
+      </g>
+      <!-- numbers -->
+      <g font-family="ui-monospace, monospace" font-size="27" font-weight="900" text-anchor="middle" dominant-baseline="middle">
+        <text x="130" y="26" fill="#3b72a1">1</text><text x="182" y="26" fill="#d46e4c">2</text><text x="234" y="26" fill="#3b72a1">1</text>
+        <text x="26" y="78" fill="#3b72a1">1</text><text x="78" y="78" fill="#d46e4c">2</text><text x="130" y="78" fill="#d46e4c">3</text><text x="182" y="78" fill="#3b72a1">1</text><text x="286" y="78" fill="#3b72a1">1</text>
+        <text x="26" y="130" fill="#3b72a1">1</text><text x="78" y="130" fill="#d46e4c">2</text><text x="130" y="130" fill="#d46e4c">3</text><text x="182" y="130" fill="#3b72a1">1</text><text x="234" y="130" fill="#d46e4c">2</text><text x="338" y="130" fill="#3b72a1">1</text>
+        <text x="78" y="182" fill="#d46e4c">2</text><text x="130" y="182" fill="#3b72a1">1</text><text x="182" y="182" fill="#3b72a1">1</text>
+        <text x="130" y="234" fill="#d46e4c">2</text><text x="182" y="234" fill="#3b72a1">1</text><text x="234" y="234" fill="#d46e4c">3</text><text x="338" y="234" fill="#3b72a1">1</text>
+      </g>
+      <!-- flags -->
+      <g fill="#d46e4c" stroke="#294a40" stroke-width="3"><path d="M285 14v27M285 14l22 10-22 10"/><path d="M389 118v27M389 118l22 10-22 10"/><path d="M233 274v27M233 274l22 10-22 10"/></g>
+      <!-- unopened tile highlight -->
+      <rect x="312" y="0" width="52" height="52" fill="#83a48a" stroke="#e6be5b" stroke-width="5"/>
+    </g>
+    <text x="764" y="605" text-anchor="middle" fill="#66806d" font-size="13" font-family="system-ui, sans-serif" letter-spacing="2">SAFE CELLS  /  45</text>
+  </g>
+  <text x="72" y="785" fill="#789184" font-size="13" font-family="system-ui, sans-serif">DESIGN SKETCH · MINESWEEPER V0.1 · 2026-11-11</text>
+  <text x="1128" y="785" text-anchor="end" fill="#789184" font-size="13" font-family="system-ui, sans-serif">TAIWAN BRAWL LAB</text>
+</svg>

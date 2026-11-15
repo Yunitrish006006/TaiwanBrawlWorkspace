@@ -54,10 +54,10 @@
 | P2P 連線 | WebRTC DataChannel 傳事件 | 預設開啟；已有 Chrome loopback 兩 peer runtime 測試，不等於兩台真機或 Internet NAT 驗收 |
 | P2P 連線 | 手動交換 signed offer／answer／ICE，不依賴 hosted signaling | 已實作；瀏覽器雙 peer 建連和簽章測試通過；不同網路環境、手機交換操作仍待驗收 |
 | P2P 連線 | 自動 hosted signaling | 已有 Worker SignalRoom negotiation relay 與本機 workerd eviction 測試；正式部署、NAT 與真機尚未驗收 |
-| 同步與回退 | P2P 不可用時使用 server pending-message relay、cursor 與 ack | 逐裝置 pending、cursor、receipt 與最後一台啟用裝置 ack 後刪除已實作並有 backend／adapter 測試；正式 App 因 E2EE 尚未就緒而 fail-closed，relay event write 目前關閉；推播不是 durable source |
+| 同步與回退 | P2P 不可用時使用 server pending-message relay、cursor 與 ack | 逐裝置 pending、cursor、receipt 與最後一台啟用裝置 ack 後刪除已實作；正式 App 已在有 conversation key 時以 AES-GCM 密文寫入 relay，缺 key 仍 fail-closed；背景恢復／通知點入會重新拉取密文並在本機解密 |
 | 身分與信任 | 裝置 Ed25519 簽章、獨立管道核對 fingerprint、拒收未信任／偽造事件 | 已實作；舊 HMAC invitation 僅為遷移相容，仍需私人管道交換 |
-| 隱私 | server relay 下的端對端訊息加密與金鑰復原政策 | **待做／需先定義**。目前有傳輸加密、簽章與本機加密，這些不等於伺服器看不到訊息內容 |
-| 通知 | FCM 通知提示、未讀對話提示、pending event 接收與 ack | 已實作 provider adapter；需真機推播註冊與前景／背景流程驗收 |
+| 隱私 | server relay 下的端對端訊息加密與金鑰復原政策 | AES-GCM envelope、secure key store 與 relay fail-closed 已接入；金鑰復原政策、正式部署與完整真機驗收仍待定義 |
+| 通知 | FCM 通知提示、未讀對話提示、pending event 接收與 ack | provider adapter、metadata-only message push、背景恢復／通知點入拉取密文已實作；需正式 FCM／APNs 設定與真機背景流程驗收 |
 | 舊資料 | Hive 舊訊息逐列驗證、事件提升、快照匯入及重試確認 | 遷移 adapters 已隔離，壞資料保留原列；正式前端預設拒絕舊明文訊息寫入、收回與快照上傳；舊讀取／匯入能力暫留供舊資料遷移，尚未清除 |
 | 操作體驗 | 連線狀態、待送／失敗／重試結果、裝置信任狀態清楚呈現 | AppBar 已用圖示／提示呈現 P2P、relay、等待選擇、連線中與失敗；同帳號啟用裝置清單、目前裝置標記、其他裝置 relay 撤銷與活動更新已實作；撤銷尚未撤銷 P2P／E2EE 金鑰信任，待送訊息的整體狀態仍需整合 |
 

@@ -12,6 +12,7 @@
 - [Plan choice UI](../apps/plan_selector/README.md)
 - [Dependency contracts](dependency-contracts.md)
 - [Development guidelines](development-guidelines.md)
+- [Global game UI settings contract](global-game-ui-settings-contract.md)
 - [Model tiering and quota use](model-tiering.md)
 - [Release and deploy checklist](release-checklist.md)
 - [Third mini-game design plan: Street Scavenging](../../taiwan_brawl_front/packages/games/street_scrap/docs/third-game-design-plan.md)

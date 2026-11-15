@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="390" height="844" viewBox="0 0 390 844">
+  <rect width="390" height="844" rx="28" fill="#162b2b"/>
+  <text x="28" y="54" fill="#f6e7b4" font-family="system-ui" font-size="26" font-weight="800">踩地雷</text>
+  <text x="28" y="78" fill="#9db5a2" font-family="system-ui" font-size="12" letter-spacing="2">礦工模式</text>
+  <rect x="24" y="96" width="342" height="58" rx="16" fill="#f6e7b4"/>
+  <text x="42" y="122" fill="#294a40" font-family="system-ui" font-size="14" font-weight="700">礦工模式</text>
+  <text x="42" y="142" fill="#294a40" font-family="system-ui" font-size="11">中心預挖・只能走已揭開的格子</text>
+  <rect x="24" y="174" width="342" height="342" rx="20" fill="#294a40" stroke="#688873" stroke-width="2"/>
+  <g stroke="#d2bd7a" stroke-width="1" opacity=".8">
+    <path d="M42 192H348M42 214H348M42 236H348M42 258H348M42 280H348M42 302H348M42 324H348M42 346H348M42 368H348M42 390H348M42 412H348M42 434H348M42 456H348M42 478H348M42 500H348"/>
+    <path d="M42 192V500M64 192V500M86 192V500M108 192V500M130 192V500M152 192V500M174 192V500M196 192V500M218 192V500M240 192V500M262 192V500M284 192V500M306 192V500M328 192V500M348 192V500"/>
+  </g>
+  <rect x="174" y="324" width="44" height="44" rx="5" fill="#8caf9a" stroke="#e6be5b" stroke-width="4"/>
+  <text x="188" y="353" font-size="23">⛏️</text>
+  <text x="116" y="290" fill="#3b72a1" font-family="system-ui" font-size="18" font-weight="700">1</text>
+  <text x="244" y="378" fill="#d46e4c" font-family="system-ui" font-size="18" font-weight="700">2</text>
+  <text x="88" y="422" fill="#3b72a1" font-family="system-ui" font-size="18" font-weight="700">1</text>
+  <text x="28" y="548" fill="#9db5a2" font-family="system-ui" font-size="12">選擇動作後點擊格子；移動只能進入已揭開格</text>
+  <g transform="translate(30 578)">
+    <circle cx="72" cy="72" r="48" fill="#294a40" stroke="#688873" stroke-width="2"/>
+    <circle cx="72" cy="72" r="25" fill="#355449"/>
+    <text x="54" y="77" fill="#9db5a2" font-family="system-ui" font-size="12">搖桿</text>
+    <text x="66" y="18" fill="#f6e7b4" font-size="24">▲</text>
+    <text x="66" y="136" fill="#f6e7b4" font-size="24">▼</text>
+    <text x="4" y="80" fill="#f6e7b4" font-size="24">◀</text>
+    <text x="130" y="80" fill="#f6e7b4" font-size="24">▶</text>
+  </g>
+  <g transform="translate(210 586)">
+    <rect width="150" height="58" rx="14" fill="#e6be5b"/>
+    <text x="42" y="36" fill="#162b2b" font-family="system-ui" font-size="17" font-weight="800">⛏ 挖掘</text>
+    <rect y="70" width="150" height="58" rx="14" fill="#294a40" stroke="#f6e7b4" stroke-width="2"/>
+    <text x="44" y="106" fill="#f6e7b4" font-family="system-ui" font-size="17" font-weight="800">⚑ 插旗</text>
+  </g>
+  <rect x="24" y="746" width="342" height="54" rx="16" fill="#e6be5b"/>
+  <text x="137" y="780" fill="#294a40" font-family="system-ui" font-size="16" font-weight="800">重新開始</text>
+</svg>

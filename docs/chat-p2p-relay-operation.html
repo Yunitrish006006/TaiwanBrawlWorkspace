@@ -1,0 +1,37 @@
+<div id="chat-p2p-relay-operation" style="font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#172033; background:#f5f7fb; padding:24px; border-radius:18px; max-width:980px; margin:0 auto;">
+  <style>
+    #chat-p2p-relay-operation * { box-sizing:border-box; }
+    #chat-p2p-relay-operation h1 { margin:0 0 8px; font-size:24px; }
+    #chat-p2p-relay-operation .sub { color:#5c6678; margin-bottom:20px; }
+    #chat-p2p-relay-operation .flow { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; align-items:stretch; }
+    #chat-p2p-relay-operation .step { background:#fff; border:1px solid #dce2ed; border-radius:14px; padding:14px; min-height:184px; position:relative; box-shadow:0 4px 14px rgba(30,45,70,.06); }
+    #chat-p2p-relay-operation .step:not(:last-child)::after { content:'→'; position:absolute; right:-19px; top:76px; color:#7c8799; font-size:24px; z-index:2; }
+    #chat-p2p-relay-operation .num { display:inline-flex; width:28px; height:28px; border-radius:50%; background:#3559c7; color:#fff; align-items:center; justify-content:center; font-weight:700; margin-bottom:10px; }
+    #chat-p2p-relay-operation h2 { font-size:16px; margin:0 0 8px; }
+    #chat-p2p-relay-operation p { font-size:13px; line-height:1.5; margin:5px 0; color:#4d596d; }
+    #chat-p2p-relay-operation .tag { display:inline-block; padding:3px 7px; border-radius:999px; font-size:11px; margin-top:8px; background:#e8edff; color:#2949a4; }
+    #chat-p2p-relay-operation .sequence { margin-top:20px; background:#172033; color:#edf2ff; border-radius:14px; padding:16px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; line-height:1.8; overflow:auto; }
+    #chat-p2p-relay-operation .key { color:#8dd7b0; } #chat-p2p-relay-operation .cipher { color:#f6c56d; } #chat-p2p-relay-operation .server { color:#b9c7ff; }
+    @media (max-width:760px) { #chat-p2p-relay-operation .flow { grid-template-columns:1fr 1fr; } #chat-p2p-relay-operation .step:not(:last-child)::after { content:''; } }
+    @media (max-width:440px) { #chat-p2p-relay-operation .flow { grid-template-columns:1fr; } }
+  </style>
+  <h1>聊天 P2P 配對與加密 Relay</h1>
+  <div class="sub">聊天頁面點擊鎖頭按鈕「安全配對」；一般流程不需要手動複製貼上。</div>
+  <div style="background:#fff;border:1px solid #dce2ed;border-radius:14px;padding:14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">
+    <div style="width:42px;height:42px;border-radius:12px;background:#e8edff;display:flex;align-items:center;justify-content:center;font-size:22px;" aria-hidden="true">🔒</div>
+    <div><strong>安全配對</strong><div style="font-size:13px;color:#5c6678;margin-top:3px;">點擊鎖頭開啟新版配對 UI；手動交換資料收在進階選項。</div></div>
+  </div>
+  <div class="flow" role="img" aria-label="四步驟操作：P2P配對、交換conversation key、P2P傳送、斷線後加密relay">
+    <div class="step"><div class="num">1</div><h2>點擊鎖頭</h2><p>從聊天頁面的「安全配對」鎖頭按鈕進入新版配對 UI。</p><span class="tag">新版入口</span></div>
+    <div class="step"><div class="num">2</div><h2>自動 P2P 配對</h2><p>Hosted SignalRoom 建立 WebRTC DataChannel；一般使用者不用貼上密碼。</p><span class="tag">預設流程</span></div>
+    <div class="step"><div class="num">3</div><h2>建立 conversation key</h2><p>雙方交換 key-establishment payload，確認 fingerprint 後保存。</p><span class="tag">新增最小功能</span></div>
+    <div class="step"><div class="num">4</div><h2>斷線後 relay</h2><p>前端加密後才送出 ciphertext；D1、Worker、push 都不取得明文。</p><span class="tag">密文備援</span></div>
+  </div>
+  <div class="sequence" aria-label="資料流示意">
+    A device ── WebRTC pairing ── B device<br>
+    A device ── <span class="key">conversation key establishment</span> ── B device<br>
+    A device ── plaintext event ── <span class="key">P2P DataChannel</span> ── B device<br>
+    A device ── <span class="cipher">encrypt → ciphertext + nonce</span> ── <span class="server">Worker / D1 pending relay</span><br>
+    B device ── <span class="server">poll ciphertext</span> ── <span class="cipher">decrypt → verify → durable ingest → ACK</span>
+  </div>
+</div>

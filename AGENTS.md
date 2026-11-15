@@ -19,6 +19,15 @@ TaiwanBrawlWorkspace is the coordination and architecture-knowledge repository f
 - `taiwan_brawl_core` owns platform-neutral runtime configuration; it must not own session tokens, provider API keys, or device secrets.
 - `taiwan_brawl_messaging` owns transport-neutral messaging events, projections, identity/storage ports, and sync primitives; Flutter/platform adapters remain outside this package.
 
+## Global game UI settings contract
+
+- The canonical cross-game settings contract is `docs/global-game-ui-settings-contract.md`.
+- Taiwan Brawl is the single owner of user-facing settings. Games must receive the active settings from the host through the shared game-settings interface/scope; a game must not create a second source of truth for locale, theme, brightness mode, font scale, or accessibility flags.
+- The host provides the active locale, but game translation content belongs to the owning game repository. Do not put game-specific translation tables into `taiwan_brawl_front/assets/i18n`; that directory is for host, chat, and shared social UI.
+- A game may define additional game-only settings, but it must keep them separate from the host settings and must state why a host setting is not applicable.
+- Any new or modified game entry point must accept the shared settings interface (directly or through the host scope), consume the settings it needs, and include a consumer test for locale/theme/font-scale behavior when applicable.
+- A nested `MaterialApp` inside a hosted game is prohibited unless it explicitly forwards the host settings and is justified in the contract.
+
 ## Contract rules
 
 - DM delivery is currently polling-first through `pending_messages`; do not describe it as socket-first unless both implementation and contract snapshot are deliberately updated.

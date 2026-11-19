@@ -59,5 +59,6 @@ Android 及 iOS 都以使用者從可見畫面啟動本次行程為前提。使�
 - iPhone 11 的實機崩潰記錄顯示 FirebaseCore 初始化中止。正式 API 回傳 Android Firebase App ID，Apple SDK 拒絕此格式。前端 `b0c14f7` 檢查 Apple App ID 與指定 bundle ID 後才初始化推播，登入及訊息輪詢可在推播設定不符時繼續。20 個本機測試與靜態分析通過。修正版裝到 iPhone 11 後，使用者以原測試帳號重新登入，確認進入首頁且未閃退。
 - 後端 `179c8ea` 新增選填 `fcm.iosAppId`，保留既有共享欄位。正式部署或修改 Firebase/APNs 設定仍需另行確認。iPhone 的 QA 簽署沒有 APNs entitlement，這次的登入修正不代表 iOS 推播已驗收。
 - Pixel 7a 的 Google Credential Manager 回傳 `UNREGISTERED_ON_API_CONSOLE`，已在 Web OAuth client 所屬的 TaiwanBrawl Google Cloud 專案建立獨立 Android QA OAuth client，綁定 QA App 的套件名稱與簽署指紋。Pixel 7a 使用另一個測試帳號重試後成功進入首頁。
+- 後續改用 iPhone 15 Pro Max。已安裝並啟動相同的 `b0c14f7` QA 版，登入及雙機互動回歸待確認。
 
 - 合併需功能驗收、各 Repo CI 及人工審查。正式部署另需確認。

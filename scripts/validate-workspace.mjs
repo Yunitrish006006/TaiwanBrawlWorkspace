@@ -24,7 +24,20 @@ check(new Set(ids).size === ids.length, "repository ids must be unique");
 check(ids.includes("taiwan-brawl-front") && ids.includes("taiwan-brawl-back"), "primary front/back repositories are required");
 
 const known = new Set(ids);
-for (const rel of relationships.relationships) {
+const feature = repos.modularSpeedCameraFeature;
+const featureRelationships = relationships.featureRelationships;
+if (feature || featureRelationships) {
+  check(feature?.branch && feature.branch === featureRelationships?.branch,
+    "feature repository and dependency branches must match");
+  const names = new Set(repos.repositories.map(repo => repo.name));
+  for (const [name, commit] of Object.entries(feature?.commits ?? {})) {
+    check(names.has(name) && /^[a-f0-9]{40}$/.test(commit),
+      `unknown repository or invalid feature commit: ${name}`);
+  }
+}
+for (const rel of [
+  ...relationships.relationships, ...(featureRelationships?.relationships ?? []),
+]) {
   check(known.has(rel.from), `relationship ${rel.id} has unknown from: ${rel.from}`);
   check(known.has(rel.to) || String(rel.to).startsWith("external:"), `relationship ${rel.id} has unknown to: ${rel.to}`);
 }

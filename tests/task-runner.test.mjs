@@ -56,7 +56,13 @@ test("tool task executes locally without a model and ignores another cwd", async
   const result = await executeTaskRun(run, { stateDirectory, stdout, stderr: output() });
   assert.equal(result.status, "process-completed");
   assert.equal(result.model, null);
-  assert.equal(JSON.parse(stdout.text).repositories.length, 4);
+  const canonical = JSON.parse(fs.readFileSync(
+    path.join(workspaceRoot, "data", "repositories.json"), "utf8",
+  ));
+  assert.deepEqual(
+    JSON.parse(stdout.text).repositories.map(repo => repo.name),
+    canonical.repositories.map(repo => repo.name),
+  );
 });
 
 test("one process receives literal task text; usage is recorded without prompts", async (t) => {

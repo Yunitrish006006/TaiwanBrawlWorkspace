@@ -56,8 +56,8 @@ Android 及 iOS 都以使用者從可見畫面啟動本次行程為前提。使�
 - 後端 `3804d61` 重新執行 129 個測試並全部通過。兩個本機測試身分走過 25 次 API 請求，涵蓋 Cookie／Bearer、好友邀請與接受、DM 投遞與確認、FCM 註冊及發送內容、Royale 建房／加入／準備／狀態，以及登出。使用實際 API 處理器、SQLite 和本機房間物件，Google 與 FCM 的外部呼叫由測試替身回應。
 - 已確認兩個測試帳號可用。使用者同意以既有正式 API 僅測這兩個帳號，實機驗收與人工核准仍在進行。
 
-- iPhone 11 的實機崩潰記錄顯示 FirebaseCore 初始化中止。正式 API 回傳 Android Firebase App ID，Apple SDK 拒絕此格式。前端 `b0c14f7` 檢查 Apple App ID 與指定 bundle ID 後才初始化推播，登入及訊息輪詢可在推播設定不符時繼續。20 個本機測試與靜態分析通過。
+- iPhone 11 的實機崩潰記錄顯示 FirebaseCore 初始化中止。正式 API 回傳 Android Firebase App ID，Apple SDK 拒絕此格式。前端 `b0c14f7` 檢查 Apple App ID 與指定 bundle ID 後才初始化推播，登入及訊息輪詢可在推播設定不符時繼續。20 個本機測試與靜態分析通過。修正版裝到 iPhone 11 後，使用者以原測試帳號重新登入，確認進入首頁且未閃退。
 - 後端 `179c8ea` 新增選填 `fcm.iosAppId`，保留既有共享欄位。正式部署或修改 Firebase/APNs 設定仍需另行確認。iPhone 的 QA 簽署沒有 APNs entitlement，這次的登入修正不代表 iOS 推播已驗收。
-- Pixel 7a 的 Google Credential Manager 回傳 `UNREGISTERED_ON_API_CONSOLE`，需為 QA App 的套件名稱與簽署指紋配置獨立 Android OAuth client。
+- Pixel 7a 的 Google Credential Manager 回傳 `UNREGISTERED_ON_API_CONSOLE`，已在 Web OAuth client 所屬的 TaiwanBrawl Google Cloud 專案建立獨立 Android QA OAuth client，綁定 QA App 的套件名稱與簽署指紋。Pixel 7a 使用另一個測試帳號重試後成功進入首頁。
 
 - 合併需功能驗收、各 Repo CI 及人工審查。正式部署另需確認。

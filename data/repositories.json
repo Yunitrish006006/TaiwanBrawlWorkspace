@@ -78,6 +78,82 @@
         "Dart"
       ],
       "role": "可重用 profile 與 DM chat system abstraction；前端以 package dependency 引用。"
+    },
+    {
+      "id": "taiwan-speed-camera",
+      "name": "taiwan_speed_camera",
+      "kind": "shared-flutter-package",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/taiwan_speed_camera",
+      "defaultBranch": "feature/modular-speed-camera-20261119",
+      "commit": "4dc7dac6b8d068e5ca618ffbe3adb23849d93815",
+      "headDate": "2026-11-19T22:49:24+08:00",
+      "version": "0.1.0",
+      "stack": [
+        "Flutter",
+        "Dart"
+      ],
+      "role": "GPS 行程、快取、候選及語音提醒。"
+    },
+    {
+      "id": "user-account-core",
+      "name": "user_account_core",
+      "kind": "shared-flutter-package",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/user_account_core",
+      "defaultBranch": "feature/modular-speed-camera-20261119",
+      "commit": "cb510e95e5d41b289215118d4f8536e98b29d5d9",
+      "headDate": "2026-11-19T22:35:43+08:00",
+      "version": "0.1.0",
+      "stack": [
+        "Flutter",
+        "Dart"
+      ],
+      "role": "可重用 profile 型別、服務介面與 widget。"
+    },
+    {
+      "id": "user-social-system",
+      "name": "user_social_system",
+      "kind": "shared-flutter-package",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/user_social_system",
+      "defaultBranch": "feature/modular-speed-camera-20261119",
+      "commit": "ba52f61e807c2947e0a78b59132418c9e890c5e1",
+      "headDate": "2026-11-19T22:42:44+08:00",
+      "version": "0.1.0",
+      "stack": [
+        "Flutter",
+        "Dart"
+      ],
+      "role": "DM 與好友型別、服務介面及 DM widget。"
+    },
+    {
+      "id": "user-notification-system",
+      "name": "user_notification_system",
+      "kind": "shared-dart-package",
+      "active": true,
+      "repository": "https://github.com/Yunitrish006006/user_notification_system",
+      "defaultBranch": "feature/modular-speed-camera-20261119",
+      "commit": "c0c9cce34bd388b214d4570262371149f627561e",
+      "headDate": "2026-11-19T22:35:43+08:00",
+      "version": "0.1.0",
+      "stack": [
+        "Dart"
+      ],
+      "role": "通知內容與 Web 連結的對話導覽意圖。"
     }
-  ]
+  ],
+  "modularSpeedCameraFeature": {
+    "branch": "feature/modular-speed-camera-20261119",
+    "scope": "feature-branch",
+    "commits": {
+      "taiwan_brawl_front": "be1867b760da65a3f6f9e04f7bb429841e970000",
+      "taiwan_brawl_back": "3804d61da8b4a76577f733668c6ad3c34dc4827e",
+      "user_basic_system": "1dedff2455507f1d6e0e64cd54b9a1b84c97332a",
+      "taiwan_speed_camera": "4dc7dac6b8d068e5ca618ffbe3adb23849d93815",
+      "user_account_core": "cb510e95e5d41b289215118d4f8536e98b29d5d9",
+      "user_social_system": "ba52f61e807c2947e0a78b59132418c9e890c5e1",
+      "user_notification_system": "c0c9cce34bd388b214d4570262371149f627561e"
+    }
+  }
 }

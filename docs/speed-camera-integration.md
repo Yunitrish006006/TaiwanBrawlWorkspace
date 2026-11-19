@@ -42,10 +42,11 @@ Android 及 iOS 都以使用者從可見畫面啟動本次行程為前提。使�
 | KV 回復 | 在隔離 staging Worker 與 KV 注入目前版 SHA-256 不符，確認 manifest 與指定版本下載皆回退至前一個驗證快照，並重算點位雜湊。原 staging 目錄已重新讀取並核對。 |
 | Flutter 測速套件 | `4dc7dac` 的 12 個測試與套件 CI 通過，涵蓋 Android/iOS 模擬定位生命週期和 TTS 呼叫、離線快取、方向、附近重複點及合成道路匹配。主程式鎖定的實作 SHA 為 `1e10a09`，其後的 `4dc7dac` 只改測試。 |
 | 模組相容 | 帳號、社交、通知與 `user_basic_system` 的套件測試通過。合併匯入與舊 facade 指向同一組型別。 |
-| 前端 `be1867b` | `flutter analyze` 與 15 個測試通過，包括跨 Repo 目錄契約、好友 API／頭像解析、推播設定和 Royale 回歸。Web JS、Android Debug APK 及未簽署 iOS Debug 均完成本機建置。Firebase 依賴要求最低 iOS 15。 |
+| 前端 `be1867b` | `flutter analyze` 與 15 個測試通過，包括跨 Repo 目錄契約、好友 API／頭像解析、推播設定和 Royale 回歸。Web JS、Android Debug APK 及未簽署 iOS Debug 均完成本機建置。Firebase 依賴要求最低 iOS 15。[前端 CI](https://github.com/Yunitrish006006/taiwan_brawl_front/actions/runs/44547225070) 的跨 Repo、Android 和 iOS 工作皆通過。 |
 | Web staging 瀏覽器 | Chrome 匿名下載 1,909 筆，snapshot 指定 manifest 版本。攔截資料 API 後重新進入，畫面顯示正在使用已下載的離線資料。 |
 | Android Pixel 7a | 獨立 QA App 已安裝，匿名頁顯示 1,909 筆。前景行程切回桌面後停止，背景行程的定位前景服務在切回桌面及螢幕休眠時仍存在，結束行程或強制停止後服務解除。最後以模擬軌跡觸發原生語音，使用者確認實機播出一次繁中提醒。 |
-| iOS iPhone 11 | 開發簽署的獨立 QA App 已安裝，本機簽署驗證通過。使用者確認 iOS 顯示不受信任的開發者，GPS 與語音的實機驗收待完成。 |
-| 道路和產品驗收 | 待以審核過的道路綁定和實地路線驗證道路匹配、語音及誤報。登入、好友、聊天、遊戲與推播的完整實機互動回歸待完成。 |
+| iOS iPhone 11 | 使用者信任本機開發簽署後，確認匿名讀取 1,909 筆、使用 App 期間定位，以及鎖定約 10 秒前後均顯示行車模式執行中。使用者結束行程，另以模擬軌跡在實機確認播出一次繁中語音。鎖屏期間的 GPS 樣點未獨立記錄。 |
+| Workspace | 369 項結構檢查、26 個 Node 測試、Viewer 分析與 Web build 通過。Viewer CI 以 Flutter 3.44.0 執行。 |
+| 道路和產品驗收 | 待以審核過的道路綁定和實地路線驗證道路匹配、鎖屏語音及誤報。登入、好友、聊天、遊戲與推播的完整實機互動回歸待完成。 |
 
 - 合併需功能驗收、各 Repo CI 及人工審查。正式部署另需確認。

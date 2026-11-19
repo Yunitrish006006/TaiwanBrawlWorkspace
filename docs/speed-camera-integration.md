@@ -6,7 +6,7 @@ Status: **in development**. This document records target boundaries, not claims 
 - `taiwan_brawl_front`: app shell, optional `packages/taiwan_speed_camera` Flutter package, Android/iOS foreground GPS permissions.
 - `taiwan_brawl_back`: official NPA dataset 7320 CSV ingestion, schema validation, versioned snapshot, read-only API, automated tests.
 - `TaiwanBrawlWorkspace`: cross-repository contract, dependencies and release gate.
-- `user_basic_system`: remains unchanged. Account/social separation is a separate migration and must preserve all existing APIs.
+- `user_basic_system`: a separate feature branch adds `user_account_core.dart` and `user_social_system.dart` compatibility facades; the old combined export remains unchanged. These facades are not separate repositories yet.
 - Long-term: move `packages/taiwan_speed_camera` to its own Repository, keeping its `SpeedCameraPage` public API. It is not a separate Repo yet.
 
 ## Isolation contracts

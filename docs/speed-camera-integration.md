@@ -49,4 +49,15 @@ Android 及 iOS 都以使用者從可見畫面啟動本次行程為前提。使�
 | Workspace | 369 項結構檢查、26 個 Node 測試、Viewer 分析與 Web build 通過。Viewer CI 以 Flutter 3.44.0 執行。 |
 | 道路和產品驗收 | 待以審核過的道路綁定和實地路線驗證道路匹配、鎖屏語音及誤報。登入、好友、聊天、遊戲與推播的完整實機互動回歸待完成。 |
 
+## 第 3 項回歸與審查
+
+- 優先完成帳號、好友、聊天、遊戲及推播回歸。道路匹配與實際行車中的鎖屏語音延後驗收。
+- 前端 `93a1617` 修正啟動時登入同步清除推播點擊目標的問題。訊息輪詢仍儲存並確認其他訊息，使用者點擊的對話在消費前保有優先權。分析與 18 個本機測試通過。
+- 後端 `3804d61` 重新執行 129 個測試並全部通過。兩個本機測試身分走過 25 次 API 請求，涵蓋 Cookie／Bearer、好友邀請與接受、DM 投遞與確認、FCM 註冊及發送內容、Royale 建房／加入／準備／狀態，以及登出。使用實際 API 處理器、SQLite 和本機房間物件，Google 與 FCM 的外部呼叫由測試替身回應。
+- 已確認兩個測試帳號可用。使用者同意以既有正式 API 僅測這兩個帳號，實機驗收與人工核准仍在進行。
+
+- iPhone 11 的實機崩潰記錄顯示 FirebaseCore 初始化中止。正式 API 回傳 Android Firebase App ID，Apple SDK 拒絕此格式。前端 `b0c14f7` 檢查 Apple App ID 與指定 bundle ID 後才初始化推播，登入及訊息輪詢可在推播設定不符時繼續。20 個本機測試與靜態分析通過。
+- 後端 `179c8ea` 新增選填 `fcm.iosAppId`，保留既有共享欄位。正式部署或修改 Firebase/APNs 設定仍需另行確認。iPhone 的 QA 簽署沒有 APNs entitlement，這次的登入修正不代表 iOS 推播已驗收。
+- Pixel 7a 的 Google Credential Manager 回傳 `UNREGISTERED_ON_API_CONSOLE`，需為 QA App 的套件名稱與簽署指紋配置獨立 Android OAuth client。
+
 - 合併需功能驗收、各 Repo CI 及人工審查。正式部署另需確認。

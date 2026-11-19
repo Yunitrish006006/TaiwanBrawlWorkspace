@@ -147,8 +147,8 @@
     "branch": "feature/modular-speed-camera-20261119",
     "scope": "feature-branch",
     "commits": {
-      "taiwan_brawl_front": "be1867b760da65a3f6f9e04f7bb429841e970000",
-      "taiwan_brawl_back": "3804d61da8b4a76577f733668c6ad3c34dc4827e",
+      "taiwan_brawl_front": "b0c14f7902d966fec1cd8923afb95042ddaf4e14",
+      "taiwan_brawl_back": "179c8ea108938e55b1c015789c43dce59bdae3a6",
       "user_basic_system": "1dedff2455507f1d6e0e64cd54b9a1b84c97332a",
       "taiwan_speed_camera": "4dc7dac6b8d068e5ca618ffbe3adb23849d93815",
       "user_account_core": "cb510e95e5d41b289215118d4f8536e98b29d5d9",

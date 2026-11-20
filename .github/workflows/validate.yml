@@ -21,19 +21,27 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Yunitrish006006/taiwan_brawl_front
-          ref: dfb95c46d1f397a68ab21aef66f6c4ace3f948d3
+          ref: 76a8e86f047e3e02316c0967a041e37ee97ad88e
           path: _validation/taiwan_brawl_front
       - name: Checkout architecture backend source
         uses: actions/checkout@v4
         with:
           repository: Yunitrish006006/taiwan_brawl_back
-          ref: d5fff5cdeb24b7f4e8468929285c1763196d77e6
+          ref: 771ac5d6dd2cd26258b7c88c747c63b0fdd25e98
           path: _validation/taiwan_brawl_back
+      - name: Checkout reusable social contracts
+        uses: actions/checkout@v4
+        with:
+          repository: Yunitrish006006/user_social_system
+          ref: d3d8e60857d5f92fdb55ae8236ea0533fa54033b
+          path: _validation/user_social_system
       - name: Expose sibling repository paths to boundary tests
         run: |
           mkdir -p "$RUNNER_TEMP/taiwan-brawl-validation"
           mv "$GITHUB_WORKSPACE/_validation/taiwan_brawl_front" "$RUNNER_TEMP/taiwan-brawl-validation/taiwan_brawl_front"
           mv "$GITHUB_WORKSPACE/_validation/taiwan_brawl_back" "$RUNNER_TEMP/taiwan-brawl-validation/taiwan_brawl_back"
+          mv "$GITHUB_WORKSPACE/_validation/user_social_system" "$RUNNER_TEMP/taiwan-brawl-validation/user_social_system"
+          ln -s "$RUNNER_TEMP/taiwan-brawl-validation/user_social_system" "$GITHUB_WORKSPACE/../user_social_system"
           ln -s "$RUNNER_TEMP/taiwan-brawl-validation/taiwan_brawl_front" "$GITHUB_WORKSPACE/_validation/taiwan_brawl_front"
           ln -s "$RUNNER_TEMP/taiwan-brawl-validation/taiwan_brawl_back" "$GITHUB_WORKSPACE/_validation/taiwan_brawl_back"
           ln -s "$RUNNER_TEMP/taiwan-brawl-validation/taiwan_brawl_front" "$GITHUB_WORKSPACE/../taiwan_brawl_front"

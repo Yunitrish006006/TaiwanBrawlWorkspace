@@ -898,10 +898,11 @@ test('game packages remain peer modules with no cross-game source or runtime dep
       ]) {
         await readFile(join(packageRoot, ownerPath), 'utf8');
       }
-      assert.doesNotMatch(
-        pubspec,
-        /resources\/data/,
-        'downloadable Street Scrap content stays out of bundled Flutter assets',
+      const bundledManifests = pubspec.match(/^[ \t]*- resources\/data\/[^\r\n]+/gm) ?? [];
+      assert.deepEqual(
+        bundledManifests.map((entry) => entry.trim()),
+        ['- resources/data/street-scrap-content-chapters-0-4-v1.json'],
+        'only the playable base content is bundled; expansions remain optional',
       );
       for (const previousCoordinationPath of [
         'data/street-scrap-design.json',
@@ -1125,7 +1126,7 @@ test('Mini Royale package owns its manifest and frontend traffic uses its versio
     'utf8',
   );
   const inviteModel = await readFile(
-    join(frontendRoot, 'lib', 'models', 'friends_models.dart'),
+    join(workspaceRoot, '..', 'user_social_system', 'lib', 'src', 'models', 'friends_models.dart'),
     'utf8',
   );
   const inviteRegistry = await readFile(
@@ -2005,7 +2006,9 @@ test('friends profile parsing can use the injected API origin', async () => {
   );
   assert.match(friendsService, /AppConfiguration\? configuration/);
   assert.match(friendsService, /apiBaseUrl/);
-  assert.match(friendsModels, /apiBaseUrl/);
+  assert.match(friendsService, /resolveRemoteImageUrl\(value, apiBaseUrl: _apiBaseUrl\)/);
+  assert.match(friendsService, /resolveAvatar: _resolveAvatar/);
+  assert.match(friendsModels, /package:user_social_system/);
 });
 
 test('Royale image-bearing models propagate the injected API origin', async () => {

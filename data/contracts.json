@@ -514,6 +514,56 @@
         "flutter analyze",
         "provider initialization smoke test"
       ]
+    },
+    {
+      "id": "speed-camera-catalog",
+      "owners": [
+        "taiwan-brawl-back"
+      ],
+      "consumers": [
+        "taiwan-speed-camera"
+      ],
+      "surface": [
+        "GET /api/speed-cameras/manifest",
+        "GET /api/speed-cameras/snapshot?version=<version>"
+      ],
+      "invariants": [
+        "Anonymous catalog access",
+        "Current and previous versions verified by SHA-256",
+        "GPS samples stay on-device"
+      ],
+      "validation": [
+        "Worker KV publication tests",
+        "Flutter/backend cross-repo contract fixture",
+        "Dedicated staging API smoke test"
+      ]
+    },
+    {
+      "id": "modular-user-ports",
+      "owners": [
+        "user-account-core",
+        "user-social-system",
+        "user-notification-system"
+      ],
+      "consumers": [
+        "taiwan-brawl-front",
+        "user-basic-system"
+      ],
+      "surface": [
+        "ProfileService",
+        "DmService",
+        "FriendsDirectory",
+        "PushConversationIntent"
+      ],
+      "invariants": [
+        "Host owns credentials and platform transport",
+        "Legacy profile and DM imports resolve to the same public Dart types"
+      ],
+      "validation": [
+        "Standalone package tests",
+        "Compatibility facade tests",
+        "Host regression tests"
+      ]
     }
   ]
 }

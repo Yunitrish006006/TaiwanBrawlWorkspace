@@ -52,7 +52,7 @@ test('Mini Royale arena consumes package contracts through host adapters', async
   }
   assert.match(adapter, /extends MiniRoyaleArenaSocialPort/);
   assert.match(adapter, /showFriendSearchDialog/);
-  assert.match(localizationAdapter, /extends MiniRoyaleLocalizationPort/);
+  assert.match(localizationAdapter, /extends (?:mini_royale\.)?MiniRoyaleLocalizationPort/);
   assert.match(localizationAdapter, /_localeProvider\.addListener/);
   assert.match(hostScope, /ChangeNotifierProvider<MiniRoyaleArenaSocialPort>/);
   assert.match(hostScope, /ChangeNotifierProvider<MiniRoyaleLocalizationPort>/);

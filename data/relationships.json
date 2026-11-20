@@ -104,5 +104,73 @@
       "classification": "external-runtime",
       "protocol": "FCM HTTP v1"
     }
-  ]
+  ],
+  "featureRelationships": {
+    "branch": "feature/modular-speed-camera-integration-20261120",
+    "relationships": [
+      {
+        "id": "front-taiwan-speed-camera",
+        "from": "taiwan-brawl-front",
+        "to": "taiwan-speed-camera",
+        "classification": "build-hard",
+        "protocol": "Flutter pub Git dependency pinned to commit"
+      },
+      {
+        "id": "front-user-account-core",
+        "from": "taiwan-brawl-front",
+        "to": "user-account-core",
+        "classification": "build-hard",
+        "protocol": "Flutter pub Git dependency pinned to commit"
+      },
+      {
+        "id": "front-user-social-system",
+        "from": "taiwan-brawl-front",
+        "to": "user-social-system",
+        "classification": "build-hard",
+        "protocol": "Flutter pub Git dependency pinned to commit"
+      },
+      {
+        "id": "front-user-notification-system",
+        "from": "taiwan-brawl-front",
+        "to": "user-notification-system",
+        "classification": "build-hard",
+        "protocol": "Flutter pub Git dependency pinned to commit"
+      },
+      {
+        "id": "compat-user-account-core",
+        "from": "user-basic-system",
+        "to": "user-account-core",
+        "classification": "build-hard",
+        "protocol": "Compatibility exports use the same Dart types"
+      },
+      {
+        "id": "compat-user-social-system",
+        "from": "user-basic-system",
+        "to": "user-social-system",
+        "classification": "build-hard",
+        "protocol": "Compatibility exports use the same Dart types"
+      },
+      {
+        "id": "camera-data-api",
+        "from": "taiwan-speed-camera",
+        "to": "taiwan-brawl-back",
+        "classification": "runtime-hard",
+        "protocol": "Anonymous versioned snapshot and manifest HTTP API"
+      },
+      {
+        "id": "camera-source-npa",
+        "from": "taiwan-brawl-back",
+        "to": "external:npa-7320",
+        "classification": "external-runtime",
+        "protocol": "Official NPA CSV"
+      },
+      {
+        "id": "camera-catalog-kv",
+        "from": "taiwan-brawl-back",
+        "to": "external:cloudflare-kv",
+        "classification": "external-hard",
+        "protocol": "Staging SPEED_CAMERA_DATA KV"
+      }
+    ]
+  }
 }

@@ -34,9 +34,9 @@ Pixel 7a 以原簽章更新獨立 QA App 至版本代碼 3。使用者確認停�
 
 ## 2026-11-20 iOS 同版安裝與雙機回歸
 
-「黑貓宅急便」以既有開發簽章更新獨立 QA App，與 Pixel 7a 同為前端 `6dda0b1`、版本代碼 3。兩台以先前核准的測試帳號連接既有正式 API，測速目錄仍使用 staging。iPhone 15 Pro Max 確認靜止速度為 0 km/h 且可聽見繁中試播。
+「黑貓宅急便」以既有開發簽章更新獨立 QA App，與 Pixel 7a 同為前端 `6dda0b1`、版本代碼 3。兩台以先前核准的測試帳號連接既有正式 API，測速目錄仍使用 staging。iPhone 15 Pro Max 確認靜止速度為 0 km/h 且可聽見繁中試播。開啟鎖屏繼續行程後，鎖屏約 10 秒再解鎖，畫面仍顯示行車模式執行中。鎖屏期間的實際 GPS 樣點和語音未獨立驗證。
 
-使用者確認兩台均能登入到首頁、好友正常、DM 雙向顯示、Pixel 從背景收到 iPhone 發出的 DM 推播且點進正確對話，兩機亦完成私人 Mini Royale 房入場與開局。未單獨確認是否重新建立好友關係。iOS QA 版未具 APNs entitlement，且已部署的通知設定指定的 Apple bundle ID 與 QA 版不同，此版未驗 iOS 收推播。
+使用者確認兩台均能登入到首頁、好友正常、DM 雙向顯示、Pixel 從背景收到 iPhone 發出的 DM 推播且點進正確對話，兩機亦完成私人 Mini Royale 房入場與開局，短暫切回桌面後再次開啟 App，確認回到同一局。未單獨驗證斷網後重連。未單獨確認是否重新建立好友關係。iOS QA 版未具 APNs entitlement，且已部署的通知設定指定的 Apple bundle ID 與 QA 版不同，此版未驗 iOS 收推播。
 
 Pixel 在首次開啟 DM 前留下 `403 Device is not active`。前端另在 `feature/qa-chat-device-registration-20261120` 的 `d753dab` 修正登入後首次 pending 輪詢前先註冊聊天裝置。已撤銷裝置仍由伺服器拒絕。靜態分析通過，完整前端測試 417 通過、4 略過。修正未裝到上述兩台，首頁首次註冊情境仍待實機重驗。
 

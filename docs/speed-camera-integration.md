@@ -32,6 +32,14 @@ Google Play 內部測試已發布 `0.132.0 (132)`，來源是前端 `84042d6`。
 
 Pixel 7a 以原簽章更新獨立 QA App 至版本代碼 3。使用者確認停著顯示 0 km/h 且聽到繁中試播，Android 音訊紀錄也確認引擎開始及結束播放。實際行車自動播報、精確道路匹配及 iOS 實機仍需驗證。修正版尚未上傳到 Google Play；內測 132 版仍可用於其他回歸。
 
+## 2026-11-20 iOS 同版安裝與雙機回歸
+
+「黑貓宅急便」以既有開發簽章更新獨立 QA App，與 Pixel 7a 同為前端 `6dda0b1`、版本代碼 3。兩台以先前核准的測試帳號連接既有正式 API，測速目錄仍使用 staging。iPhone 15 Pro Max 確認靜止速度為 0 km/h 且可聽見繁中試播。
+
+使用者確認兩台均能登入到首頁、好友正常、DM 雙向顯示、Pixel 從背景收到 iPhone 發出的 DM 推播且點進正確對話，兩機亦完成私人 Mini Royale 房入場與開局。未單獨確認是否重新建立好友關係。iOS QA 版未具 APNs entitlement，且已部署的通知設定指定的 Apple bundle ID 與 QA 版不同，此版未驗 iOS 收推播。
+
+Pixel 在首次開啟 DM 前留下 `403 Device is not active`。前端另在 `feature/qa-chat-device-registration-20261120` 的 `d753dab` 修正登入後首次 pending 輪詢前先註冊聊天裝置。已撤銷裝置仍由伺服器拒絕。靜態分析通過，完整前端測試 417 通過、4 略過。修正未裝到上述兩台，首頁首次註冊情境仍待實機重驗。
+
 ## 模組邊界
 
 | Repository | 責任 |

@@ -8,14 +8,17 @@
 
 | Repository | 候選提交 | 已驗證的結果 |
 | --- | --- | --- |
-| `taiwan_brawl_front` | `76a8e86` | Flutter 分析無問題。完整測試 416 個通過、4 個略過，含 backend 產生的測速契約。Street Scrap 套件 352 個通過。 |
+| `taiwan_brawl_front` | App 實作 `76a8e86`，CI `6dfe6fc` | Flutter 分析無問題。完整測試 416 個通過、4 個略過，含 backend 產生的測速契約。Street Scrap 套件 352 個通過。另以 Chrome 驗 WebRTC 與 IndexedDB，共 7 個通過。 |
+| `user_ui_settings` | `0646dd4` | 平台 CI 使用含共用遊戲設定介面的已發布提交，與本機候選版相同。 |
 | `taiwan_brawl_back` | `771ac5d` | 234 個 Node、1 個 Worker Vitest、56 個資料庫測試全通過。GitHub 的測速驗證與遊戲資料邊界工作成功。 |
 | `user_social_system` | `d3d8e60` | 分析與 2 個測試通過。房間邀請支援 `gameId`，舊格式預設 Mini Royale。 |
-| `user_basic_system` | `d27762c` | 舊匯入、帳號與聊天 facade 一致性測試通過。 |
+| `user_basic_system` | `d27762c` | 舊匯入、帳號與聊天 facade 一致性測試及 GitHub CI 通過。 |
 
 主程式保留新版 `deviceId`、加密 DM 與離線 outbox、好友 API、情侶天數、遊戲庫與四款遊戲。合併帳號、社交與通知的 Git 依賴後，舊 DM facade 解析至同一套件版。iOS 仍沿用原開發分支的最低 iOS 26。推播啟動會確認 Apple Firebase App ID 和指定的 bundle ID，持續保留訊息輪詢與推播點擊的對話。
 
 測速 API 使用獨立 KV。主 Worker 只有在設定 `SPEED_CAMERA_DATA`、`SPEED_CAMERA_SYNC_CRON` 且觸發的 Cron 表達式精確符合時才同步測速目錄。部署時須為測速編排不同於 lifecycle outbox 的 Cron。專用 staging Worker 維持既有排程；本輪未改正式 Cloudflare 維運設定。
+
+本機 Web Release 建置成功。iOS 26 完整建置包含 Widget 擴充及定位背景模式，為未簽署產物。Pixel 7a 使用原 QA 憑證更新並由系統啟動；Android QA APK 保留 Android Widget、定位前景服務與 TTS 查詢。iOS 獨立 QA Release 完成簽署驗證，使用隔離 App ID，未嵌入正式 Widget 或共享 App Group；「黑貓宅急便」安裝的裝置網路通道逾時。情侶天數另通過本機縱向測試，涵蓋隔離 D1、Flutter 服務、快取與 Widget 介面替身。
 
 雙機好友、DM、Royale、推播深連結、iOS APNs、實地 GPS 及精確道路匹配仍需驗收。原工作區未提交的島嶼場景與 WebRTC 內容獨立保留。
 

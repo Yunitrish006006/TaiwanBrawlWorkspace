@@ -193,13 +193,14 @@
     "branch": "feature/modular-speed-camera-integration-20261120",
     "scope": "feature-branch",
     "commits": {
-      "taiwan_brawl_front": "76a8e86f047e3e02316c0967a041e37ee97ad88e",
+      "taiwan_brawl_front": "6dfe6fc227be1090d07c3e996c7a752e7157a394",
       "taiwan_brawl_back": "771ac5d6dd2cd26258b7c88c747c63b0fdd25e98",
       "user_basic_system": "d27762c17393da1a10aac6915d0c75ff872543c0",
       "taiwan_speed_camera": "4dc7dac6b8d068e5ca618ffbe3adb23849d93815",
       "user_account_core": "cb510e95e5d41b289215118d4f8536e98b29d5d9",
       "user_social_system": "d3d8e60857d5f92fdb55ae8236ea0533fa54033b",
-      "user_notification_system": "c0c9cce34bd388b214d4570262371149f627561e"
+      "user_notification_system": "c0c9cce34bd388b214d4570262371149f627561e",
+      "user_ui_settings": "0646dd48e4cb7a8a3fefbdd912065d2c37db2835"
     }
   }
 }

@@ -20,7 +20,7 @@
 
 本機 Web Release 建置成功。iOS 26 完整建置包含 Widget 擴充及定位背景模式，為未簽署產物。Pixel 7a 使用原 QA 憑證更新並由系統啟動；Android QA APK 保留 Android Widget、定位前景服務與 TTS 查詢。iOS 獨立 QA Release 完成簽署驗證，使用隔離 App ID，未嵌入正式 Widget 或共享 App Group；「黑貓宅急便」安裝的裝置網路通道逾時。情侶天數另通過本機縱向測試，涵蓋隔離 D1、Flutter 服務、快取與 Widget 介面替身。
 
-前端 `6dfe6fc` 的跨 Repo 契約及 Web、Android、iOS 建置全部通過。平台矩陣 19 項成功，Linux App 建置及 Linux 資源生命週期測試都在 `flutter_secure_storage_linux` 的第三方 JSON 標頭編譯中止。 `84042d6` 將 Clang 對該套件的單一舊語法診斷保留為警告，本機以相同標頭重現錯誤及驗證修正。Linux 完整 CI 以該提交的 GitHub 結果為準。
+前端 `6dfe6fc` 的跨 Repo 契約及 Web、Android、iOS 建置全部通過。平台矩陣 19 項成功，Linux App 建置及 Linux 資源生命週期測試都在 `flutter_secure_storage_linux` 的第三方 JSON 標頭編譯中止。 `84042d6` 將 Clang 對該套件的單一舊語法診斷保留為警告，本機以相同標頭重現錯誤及驗證修正。該提交的 Linux Release 建置和桌面資源生命週期測試均已通過，平台矩陣 21 項全數通過。測速整合的前後端契約及 Android、iOS 建置也全數通過。 [平台矩陣](https://github.com/Yunitrish006006/taiwan_brawl_front/actions/runs/44663084769) · [測速整合 CI](https://github.com/Yunitrish006006/taiwan_brawl_front/actions/runs/44663084695)
 
 雙機好友、DM、Royale、推播深連結、iOS APNs、實地 GPS 及精確道路匹配仍需驗收。原工作區未提交的島嶼場景與 WebRTC 內容獨立保留。
 
